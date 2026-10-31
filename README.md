@@ -168,4 +168,4 @@ erDiagram
 
 ---
 
-**Uso de IA:** ChatGPT foi utilizado como apoio à organização e redação da proposta da Release 1.
+**Uso de IA:** A IA foi utilizado como apoio à organização e redação da proposta da Release 1.
