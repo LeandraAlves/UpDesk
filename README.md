@@ -103,7 +103,7 @@ Todos os integrantes deverão contribuir com commits e compreender o funcionamen
 
 **Esboço inicial das oito telas (rascunho em preto e branco):**
 
-![Esboço inicial das 8 telas do UpDesk](imagens/esboco_8_telas.png)
+![Esboço inicial das 8 telas do UpDesk](esboco_8_telas.png.png)
 
 *Figura 1 — Wireframes preliminares do UpDesk, feitos com aparência de desenho no papel. O desenho é conceitual e pode ser refinado durante o desenvolvimento.*
 
