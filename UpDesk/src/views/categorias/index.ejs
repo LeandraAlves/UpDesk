@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>UpDesk - Gerenciar Categorias</title>
+</head>
+<body>
+  <h2>Gestão de Categorias</h2>
+  <% if (usuario) { %>
+    <p>Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | <a href="/autenticacao/logout">Sair</a></p>
+  <% } %>
+
+  <h3>Nova Categoria</h3>
+  <form action="/categorias/criar" method="POST">
+    <input type="text" name="nome" placeholder="Nome da Categoria" required>
+    <input type="text" name="descricao" placeholder="Descrição">
+    <button type="submit">Salvar</button>
+  </form>
+
+  <hr>
+
+  <h3>Categorias Cadastradas</h3>
+  <table border="1" cellpadding="8">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Descrição</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% categorias.forEach(cat => { %>
+        <tr>
+          <td><%= cat.id %></td>
+          <td><%= cat.nome %></td>
+          <td><%= cat.descricao || '-' %></td>
+          <td>
+            <form action="/categorias/excluir/<%= cat.id %>" method="POST" style="display:inline;">
+              <button type="submit" onclick="return confirm('Deseja excluir?')">Excluir</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

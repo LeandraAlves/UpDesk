@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>UpDesk - Cadastro</title>
+</head>
+<body>
+  <h2>UpDesk - Criar Conta</h2>
+  <form action="/autenticacao/cadastro" method="POST">
+    <div>
+      <label>Nome:</label>
+      <input type="text" name="nome" required>
+    </div>
+    <div>
+      <label>E-mail:</label>
+      <input type="email" name="email" required>
+    </div>
+    <div>
+      <label>Senha:</label>
+      <input type="password" name="senha" required>
+    </div>
+    <div>
+      <label>Perfil:</label>
+      <select name="perfil">
+        <option value="usuario">Usuário</option>
+        <option value="admin">Administrador</option>
+      </select>
+    </div>
+    <button type="submit">Cadastrar</button>
+  </form>
+  <p><a href="/autenticacao/login">Já tem conta? Faça login</a></p>
+</body>
+</html>
