@@ -15,7 +15,9 @@ exports.login = async (req, res) => {
     if (!senhaValida) return res.send('Senha incorreta.');
 
     req.session.usuario = { id: usuario.id, nome: usuario.nome, perfil: usuario.perfil };
-    res.redirect('/categorias');
+    
+    // CORRIGIDO: Agora redireciona para a tela de início limpa, e não para categorias!
+    res.redirect('/inicio');
   } catch (erro) {
     res.status(500).send('Erro interno do servidor.');
   }

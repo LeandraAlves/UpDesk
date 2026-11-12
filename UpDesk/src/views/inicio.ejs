@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestão do Sistema</title>
+</head>
+<body>
+
+  <h1>Gestão do Sistema</h1>
+  
+  <div>
+    <% if (typeof usuario !== 'undefined' && usuario) { %>
+      Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | 
+    <% } else { %>
+      Bem-vindo, <strong>Gerencia</strong> (admin) | 
+    <% } %>
+    <a href="/autenticacao/logout">Sair</a>
+  </div>
+
+  <nav>
+    <a href="/categorias">Categorias</a> | 
+    <a href="/departamentos">Departamentos</a>
+  </nav>
+
+  <hr>
+
+  <!-- Nenhuns formulários ou tabelas aqui. A tela fica igual, mas sem as funções de categoria! -->
+
+</body>
+</html>
