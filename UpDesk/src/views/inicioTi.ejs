@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel TI - UpDesk</title>
+</head>
+<body>
+
+  <h1>Painel do Setor de TI</h1>
+
+  <div>
+    Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | 
+    <a href="/inicio">Início Geral</a> | 
+    <a href="/autenticacao/logout">Sair</a>
+  </div>
+
+  <br>
+
+  <nav>
+    <a href="/categorias">Categorias</a> | 
+    <a href="/departamentos">Departamentos</a> | 
+    <a href="/usuarios">Usuários</a> | 
+    <a href="/chamados">Todos os Chamados</a> | 
+    <a href="/ti/chamados-abertos">Chamados em Aberto (Clientes)</a>
+  </nav>
+
+  <hr>
+
+  <h2>Chamados em Aberto dos Clientes</h2>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Cliente (Solicitante)</th>
+        <th>Prioridade</th>
+        <th>Status</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (chamadosAbertos && chamadosAbertos.length > 0) { %>
+        <% chamadosAbertos.forEach(c => { %>
+          <tr>
+            <td><%= c.id %></td>
+            <td><%= c.titulo %></td>
+            <td><%= c.solicitante ? c.solicitante.nome : 'Desconhecido' %></td>
+            <td><%= c.prioridade %></td>
+            <td><%= c.status %></td>
+            <td><%= c.createdAt ? c.createdAt.toLocaleDateString() : '-' %></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" style="text-align: center;">Nenhum chamado em aberto no momento.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+</body>
+</html>

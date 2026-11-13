@@ -2,133 +2,30 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UpDesk - Cadastro de Usuário</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: #f4f6f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .card-cadastro {
-      background: #ffffff;
-      padding: 30px 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 360px;
-    }
-
-    .card-cadastro h2 {
-      text-align: center;
-      margin-bottom: 24px;
-      color: #333;
-      font-size: 1.5rem;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #cccccc;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.2s ease-in-out;
-      background-color: #fff;
-    }
-
-    .form-control:focus {
-      border-color: #007bff;
-    }
-
-    select.form-control {
-      cursor: pointer;
-      color: #333;
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .btn {
-      flex: 1;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: background-color 0.2s;
-      text-align: center;
-      text-decoration: none;
-    }
-
-    .btn-secondary {
-      background-color: #ffffff;
-      border-color: #cccccc;
-      color: #555555;
-    }
-
-    .btn-secondary:hover {
-      background-color: #f0f0f0;
-    }
-
-    .btn-primary {
-      background-color: #4a5568;
-      color: #ffffff;
-    }
-
-    .btn-primary:hover {
-      background-color: #2d3748;
-    }
-  </style>
+  <title>Cadastro - UpDesk</title>
 </head>
 <body>
 
   <div class="card-cadastro">
     <h2>Cadastro</h2>
 
-    <form action="/cadastro" method="POST">
-      <div class="form-group">
-        <input type="text" name="nome" class="form-control" placeholder="Nome" required />
+    <form action="/autenticacao/cadastrar" method="POST">
+      <div>
+        <input type="text" name="nome" placeholder="Nome" required>
       </div>
-
-      <div class="form-group">
-        <input type="email" name="email" class="form-control" placeholder="E-mail" required />
+      <div>
+        <input type="email" name="email" placeholder="E-mail" required>
       </div>
-
-      <div class="form-group">
-        <input type="password" name="senha" class="form-control" placeholder="Senha" required />
+      <div>
+        <input type="password" name="senha" placeholder="Senha" required>
       </div>
+      
+      <!-- O campo de seleção de perfil foi removido. 
+           Agora todo registo público é automaticamente 'cliente'. -->
 
-      <!-- Seletor de Perfil substituindo Departamento -->
-      <div class="form-group">
-        <select name="perfil" class="form-control" required>
-          <option value="" disabled selected hidden>Perfil do Usuário</option>
-          <option value="funcionario">Funcionário</option>
-          <option value="cliente">Cliente</option>
-        </select>
-      </div>
-
-      <div class="actions">
-        <a href="/login" class="btn btn-secondary">Cancelar</a>
-        <button type="submit" class="btn btn-primary">Cadastrar</button>
+      <div>
+        <a href="/autenticacao/login">Cancelar</a>
+        <button type="submit">Cadastrar</button>
       </div>
     </form>
   </div>

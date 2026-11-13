@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Usuários - UpDesk</title>
+</head>
+<body>
+
+  <h1>Gestão do Sistema</h1>
+
+  <div>
+    Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | 
+    <a href="/inicio">Início</a> | 
+    <a href="/autenticacao/logout">Sair</a>
+  </div>
+
+  <br>
+
+  <nav>
+    <a href="/categorias">Categorias</a> | 
+    <a href="/departamentos">Departamentos</a> | 
+    <a href="/usuarios">Usuários</a>
+  </nav>
+
+  <hr>
+
+  <h2>Novo Usuário</h2>
+
+  <form action="/usuarios/cadastrar" method="POST">
+    <div>
+      <input type="text" name="nome" placeholder="Nome do Usuário" required>
+    </div>
+    <div>
+      <input type="email" name="email" placeholder="E-mail" required>
+    </div>
+    <div>
+      <input type="password" name="senha" placeholder="Senha" required>
+    </div>
+    <div>
+      <select name="perfil" required>
+        <option value="">Selecione o Perfil...</option>
+        <option value="usuario">Usuário</option>
+        <option value="admin">Admin</option>
+        <option value="cliente">Cliente</option>
+      </select>
+    </div>
+    <div>
+      <select name="categoriaId" id="categoriaSelect" required onchange="verificarCategoria(this)">
+        <option value="">Selecione a Categoria...</option>
+        <% categorias.forEach(cat => { %>
+          <option value="<%= cat.id %>" data-nome="<%= cat.nome.trim().toLowerCase() %>"><%= cat.nome %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div id="campoDepartamento" style="display: none;">
+      <select name="departamentoId">
+        <option value="">Selecione o Departamento...</option>
+        <% if (typeof departamentos !== 'undefined') { %>
+          <% departamentos.forEach(dep => { %>
+            <option value="<%= dep.id %>"><%= dep.nome %></option>
+          <% }) %>
+        <% } %>
+      </select>
+    </div>
+
+    <button type="submit">Salvar</button>
+  </form>
+
+  <hr>
+
+  <h2>Usuários Cadastrados</h2>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>E-mail</th>
+        <th>Perfil</th>
+        <th>Categoria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% usuarios.forEach(u => { %>
+        <tr>
+          <td><%= u.id %></td>
+          <td><%= u.nome %></td>
+          <td><%= u.email %></td>
+          <td><%= u.perfil %></td>
+          <td><%= u.categoria ? u.categoria.nome : 'Sem categoria' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <script>
+    function verificarCategoria(select) {
+      const selectedOption = select.options[select.selectedIndex];
+      const nomeCategoria = selectedOption.getAttribute('data-nome');
+      const campoDep = document.getElementById('campoDepartamento');
+
+      if (nomeCategoria && nomeCategoria !== 'gerencia') {
+        campoDep.style.display = 'block';
+      } else {
+        campoDep.style.display = 'none';
+      }
+    }
+  </script>
+
+</body>
+</html>

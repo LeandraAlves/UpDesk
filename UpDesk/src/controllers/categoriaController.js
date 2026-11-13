@@ -1,27 +1,39 @@
 const Categoria = require('../models/Categoria');
 
-// Renderiza a página completa e unificada de categorias (formulário + listagem)
-exports.gerenciar = async (req, res) => {
+exports.listar = async (req, res) => {
   try {
     const categorias = await Categoria.findAll();
-    res.render('categorias/index', { 
-      categorias: categorias || [], 
-      usuario: req.session.usuario || { nome: 'Gerencia', perfil: 'admin' } 
+    res.render('categorias', {
+      usuario: req.session.usuario || { nome: 'Gerencia', perfil: 'admin' },
+      categorias
     });
-  } catch (error) {
-    console.error('ERRO AO CARREGAR CATEGORIAS:', error);
-    res.status(500).send('Erro interno ao carregar categorias: ' + error.message);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao carregar categorias.');
   }
 };
 
-// Processa o novo cadastro e redireciona de volta para a mesma página
 exports.cadastrar = async (req, res) => {
+  const { nome } = req.body;
   try {
-    const { nome, descricao } = req.body;
-    await Categoria.create({ nome, descricao });
+    await Categoria.create({ nome });
     res.redirect('/categorias');
-  } catch (error) {
-    console.error('Erro ao criar categoria:', error);
-    res.status(500).send('Erro interno ao cadastrar categoria: ' + error.message);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao cadastrar categoria.');
+  }
+};
+
+// Nova função para excluir categoria
+exports.excluir = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await Categoria.destroy({
+      where: { id }
+    });
+    res.redirect('/categorias');
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao excluir categoria. Certifique-se de que não existem registos associados.');
   }
 };

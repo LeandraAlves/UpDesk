@@ -2,29 +2,30 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Gestão do Sistema</title>
+  <title>Início - UpDesk</title>
 </head>
 <body>
 
   <h1>Gestão do Sistema</h1>
-  
+
   <div>
-    <% if (typeof usuario !== 'undefined' && usuario) { %>
-      Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | 
-    <% } else { %>
-      Bem-vindo, <strong>Gerencia</strong> (admin) | 
-    <% } %>
+    Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | 
     <a href="/autenticacao/logout">Sair</a>
   </div>
 
+  <br>
+
+  <!-- Menu de Navegação Limpo -->
   <nav>
     <a href="/categorias">Categorias</a> | 
-    <a href="/departamentos">Departamentos</a>
+    <a href="/departamentos">Departamentos</a> | 
+    <a href="/usuarios">Usuários</a>
   </nav>
 
   <hr>
 
-  <!-- Nenhuns formulários ou tabelas aqui. A tela fica igual, mas sem as funções de categoria! -->
+  <!-- Painel limpo sem formulários ou tabelas -->
+  <p>Selecione uma das opções acima para gerir os módulos do sistema.</p>
 
 </body>
 </html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Chamados - UpDesk</title>
+</head>
+<body>
+
+  <h1>Gestão do Sistema</h1>
+
+  <div>
+    Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | 
+    <% if (usuario.perfil === 'admin' || usuario.perfil === 'gerencia') { %>
+      <a href="/inicio">Início</a> | 
+    <% } %>
+    <a href="/autenticacao/logout">Sair</a>
+  </div>
+
+  <br>
+
+  <nav>
+    <% if (usuario.perfil === 'admin' || usuario.perfil === 'gerencia') { %>
+      <a href="/categorias">Categorias</a> | 
+      <a href="/departamentos">Departamentos</a> | 
+      <a href="/usuarios">Usuários</a> | 
+    <% } %>
+    <a href="/chamados">Chamados</a>
+  </nav>
+
+  <hr>
+
+  <!-- O formulário de "Novo Chamado" foi removido daqui para que a Karem/clientes apenas consultem e alterem os existentes -->
+
+  <h2>Chamados Cadastrados</h2>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Solicitante</th>
+        <th>Categoria</th>
+        <th>Departamento</th>
+        <th>Prioridade</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (chamados && chamados.length > 0) { %>
+        <% chamados.forEach(c => { %>
+          <tr>
+            <td><%= c.id %></td>
+            <td><%= c.titulo %></td>
+            <td><%= c.solicitante ? c.solicitante.nome : '-' %></td>
+            <td><%= c.categoria ? c.categoria.nome : '-' %></td>
+            <td><%= c.departamento ? c.departamento.nome : '-' %></td>
+            <td><%= c.prioridade %></td>
+            <td><%= c.status %></td>
+            <td>
+              <!-- Link ou botão para alterar/gerir o chamado existente -->
+              <a href="/chamados/editar/<%= c.id %>">Editar / Detalhes</a>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="8" style="text-align: center;">Nenhum chamado registado.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+</body>
+</html>

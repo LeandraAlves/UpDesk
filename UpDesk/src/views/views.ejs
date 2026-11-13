@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - UpDesk</title>
+</head>
+<body>
+
+  <h1>Gestão do Sistema - UpDesk</h1>
+  <hr>
+
+  <h2>Iniciar Sessão</h2>
+
+  <!-- O formulário envia os dados via POST para a rota de login -->
+  <form action="/autenticacao/login" method="POST">
+    <div>
+      <label>E-mail:</label><br>
+      <input type="email" name="email" required placeholder="Digite o seu e-mail">
+    </div>
+    <br>
+    <div>
+      <label>Senha:</label><br>
+      <input type="password" name="senha" required placeholder="Digite a sua senha">
+    </div>
+    <br>
+    <button type="submit">Entrar</button>
+  </form>
+
+  <br>
+  <p>Ainda não tens conta? <a href="/autenticacao/cadastro">Registar-se</a></p>
+
+</body>
+</html>
