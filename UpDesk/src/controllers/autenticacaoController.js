@@ -70,7 +70,10 @@ module.exports = {
           perfil: usuario.perfil
         };
 
-        return res.redirect(usuario.perfil === 'cliente' ? '/chamados' : '/inicio');
+        if (usuario.perfil === 'cliente') {
+          return res.redirect('/chamados');
+        }
+        return res.redirect(usuario.perfil === 'tecnico' ? '/ti/chamados-abertos' : '/inicio');
       });
     } catch (erro) {
       console.error('Erro crítico no login:', erro);

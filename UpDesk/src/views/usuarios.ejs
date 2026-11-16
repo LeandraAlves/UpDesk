@@ -47,8 +47,10 @@
                             <span class="badge badge-info">Admin</span>
                           <% } else if (u.perfil === 'cliente') { %>
                             <span class="badge badge-warning">Cliente</span>
+                          <% } else if (u.perfil === 'tecnico') { %>
+                            <span class="badge badge-neutral">Técnico</span>
                           <% } else { %>
-                            <span class="badge badge-neutral">Usuário</span>
+                            <span class="badge badge-neutral"><%= u.perfil %></span>
                           <% } %>
                         </td>
                         <td><%= u.categoria ? u.categoria.nome : 'Sem categoria' %></td>
@@ -87,7 +89,7 @@
                 <label class="form-label">Perfil <span class="req">*</span></label>
                 <select name="perfil" class="form-control" required>
                   <option value="">Selecione o Perfil...</option>
-                  <option value="usuario">Usuário</option>
+                  <option value="tecnico">Técnico</option>
                   <option value="admin">Admin</option>
                   <option value="cliente">Cliente</option>
                 </select>

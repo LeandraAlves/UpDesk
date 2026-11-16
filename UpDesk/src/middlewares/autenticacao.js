@@ -14,4 +14,12 @@ function administrador(req, res, next) {
   return next();
 }
 
-module.exports = { autenticado, administrador };
+function tecnicoOuAdministrador(req, res, next) {
+  if (!['admin', 'tecnico'].includes(req.session.usuario.perfil)) {
+    return res.status(403).send('Acesso permitido somente para técnicos e administradores.');
+  }
+
+  return next();
+}
+
+module.exports = { autenticado, administrador, tecnicoOuAdministrador };

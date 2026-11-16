@@ -3,7 +3,7 @@ const Usuario = require('../models/Usuario');
 
 exports.painelTi = (req, res) => {
   res.render('inicioTi', { 
-    usuario: req.session.usuario || { nome: 'Técnico TI', perfil: 'admin' }
+    usuario: req.session.usuario
   });
 };
 
@@ -22,7 +22,7 @@ exports.listarChamadosAbertos = async (req, res) => {
     });
 
     res.render('inicioTi', {
-      usuario: req.session.usuario || { nome: 'Técnico TI', perfil: 'admin' },
+      usuario: req.session.usuario,
       chamadosAbertos: chamadosAbertos || []
     });
   } catch (erro) {

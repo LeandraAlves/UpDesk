@@ -15,8 +15,14 @@
     <% } %>
 
     <a href="/chamados" class="nav-item <%= rotaAtiva === 'chamados' ? 'active' : '' %>">
-      <span>📋</span> Meus Chamados
+      <span>📋</span> <%= perfilUser === 'tecnico' ? 'Chamados atribuídos' : 'Meus Chamados' %>
     </a>
+
+    <% if (perfilUser === 'admin' || perfilUser === 'tecnico') { %>
+      <a href="/ti/chamados-abertos" class="nav-item <%= rotaAtiva === 'ti' ? 'active' : '' %>">
+        <span>📊</span> Fila de atendimento
+      </a>
+    <% } %>
 
     <% if (perfilUser === 'admin' || perfilUser === 'gerencia') { %>
       <a href="/categorias" class="nav-item <%= rotaAtiva === 'categorias' ? 'active' : '' %>">
@@ -27,9 +33,6 @@
       </a>
       <a href="/usuarios" class="nav-item <%= rotaAtiva === 'usuarios' ? 'active' : '' %>">
         <span>👥</span> Usuários
-      </a>
-      <a href="/ti/chamados-abertos" class="nav-item <%= rotaAtiva === 'ti' ? 'active' : '' %>">
-        <span>📊</span> Painel TI
       </a>
     <% } %>
   </nav>

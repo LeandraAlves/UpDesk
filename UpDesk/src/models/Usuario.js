@@ -8,9 +8,13 @@ const Usuario = sequelize.define('Usuario', {
   nome: { type: DataTypes.STRING, allowNull: false },
   email: { type: DataTypes.STRING, allowNull: false, unique: true },
   senha_hash: { type: DataTypes.STRING, allowNull: false },
-  perfil: { 
-    type: DataTypes.ENUM('admin', 'usuario', 'cliente'), // Adicionado 'cliente' aqui
-    defaultValue: 'usuario' 
+  perfil: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'tecnico',
+    validate: {
+      isIn: [['admin', 'tecnico', 'cliente']]
+    }
   },
   categoriaId: { 
     type: DataTypes.INTEGER, 

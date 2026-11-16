@@ -25,6 +25,11 @@ exports.listar = async (req, res) => {
 
 exports.cadastrar = async (req, res) => {
   const { nome, email, senha, perfil, categoriaId, departamentoId } = req.body;
+
+  if (!['admin', 'tecnico', 'cliente'].includes(perfil)) {
+    return res.status(400).send('Perfil inválido.');
+  }
+
   try {
     const senha_hash = await bcrypt.hash(senha, 10);
     

@@ -56,7 +56,7 @@ Todos os integrantes deverão contribuir com commits e compreender o funcionamen
 - [ ] **Regra de negócio:** prazo calculado conforme prioridade (ex.: alta: 1 dia útil; média: 3 dias úteis; baixa: 5 dias úteis), com alerta de atraso; valores sujeitos à aprovação da equipe.
 - [ ] **Busca/filtro e paginação:** na listagem de chamados.
 - [x] **Autenticação:** cadastro, login e logout; senhas armazenadas com hash.
-- [ ] **Autorização:** dois perfis obrigatórios (Administrador e Usuário), validados no backend. O administrador gerencia categorias, departamentos e responsáveis; o usuário abre e acompanha seus chamados. O papel de técnico será uma atribuição de atendimento, a detalhar.
+- [x] **Autorização:** perfis de administrador, técnico e cliente validados no backend. O administrador gerencia o sistema; técnicos acessam a fila e os chamados atribuídos; clientes abrem e acompanham seus próprios chamados.
 - [x] **Proteção:** telas e endpoints privados acessíveis somente após autenticação.
 - [ ] **Validação:** validação no backend com mensagens claras.
 - [ ] **Boas práticas:** Sequelize (ORM), variáveis de ambiente em `.env` fora do Git e consultas seguras.

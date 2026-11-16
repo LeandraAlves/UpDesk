@@ -2,7 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const sequelize = require('./src/config/banco');
-require('./src/models');
+const { Usuario } = require('./src/models');
 const { autenticado } = require('./src/middlewares/autenticacao');
 
 const sessionSecret = process.env.SESSION_SECRET ||
@@ -49,9 +49,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/inicio', autenticado, (req, res) => {
-  // Se um cliente tentar aceder ao /inicio, é redirecionado de volta para os chamados
-  if (req.session.usuario.perfil === 'cliente' || req.session.usuario.perfil === 'usuario') {
+  if (req.session.usuario.perfil === 'cliente') {
     return res.redirect('/chamados');
+  }
+  if (req.session.usuario.perfil === 'tecnico') {
+    return res.redirect('/ti/chamados-abertos');
   }
   res.render('inicio', { usuario: req.session.usuario });
 });
@@ -68,7 +70,15 @@ app.use('/ti', autenticado, tiRotas);
 const PORT = process.env.PORT || 3000;
 
 sequelize.sync({ alter: true })
-  .then(() => {
+  .then(async () => {
+    const [usuariosAtualizados] = await Usuario.update(
+      { perfil: 'tecnico' },
+      { where: { perfil: 'usuario' } }
+    );
+    if (usuariosAtualizados > 0) {
+      console.log(`${usuariosAtualizados} usuário(s) migrado(s) para o perfil técnico.`);
+    }
+
     console.log('Banco de dados sincronizado com sucesso.');
     app.listen(PORT, () => {
       console.log(`Servidor a correr em http://localhost:${PORT}`);

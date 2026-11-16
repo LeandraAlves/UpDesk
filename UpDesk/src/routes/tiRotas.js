@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const tiController = require('../controllers/tiController');
-const { administrador } = require('../middlewares/autenticacao');
+const { tecnicoOuAdministrador } = require('../middlewares/autenticacao');
 
-router.use(administrador);
+router.use(tecnicoOuAdministrador);
 router.get('/', tiController.painelTi);
 router.get('/chamados-abertos', tiController.listarChamadosAbertos);
 

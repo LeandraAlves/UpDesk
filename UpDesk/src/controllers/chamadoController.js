@@ -5,9 +5,12 @@ const Departamento = require('../models/Departamento');
 
 exports.listar = async (req, res) => {
   try {
-    const where = ['admin', 'gerencia'].includes(req.session.usuario.perfil)
+    const perfil = req.session.usuario.perfil;
+    const where = ['admin', 'gerencia'].includes(perfil)
       ? {}
-      : { usuarioId: req.session.usuario.id };
+      : perfil === 'tecnico'
+        ? { tecnicoId: req.session.usuario.id }
+        : { usuarioId: req.session.usuario.id };
     const chamados = await Chamado.findAll({
       where,
       include: [
