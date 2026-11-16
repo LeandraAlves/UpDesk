@@ -2,13 +2,10 @@ const express = require('express');
 const router = express.Router();
 const autenticacaoController = require('../controllers/autenticacaoController');
 
-// Linha 5 (ou por volta disso): Certifica-te de que autenticacaoController.renderizarLogin existe e é uma função
 router.get('/login', autenticacaoController.renderizarLogin);
 router.post('/login', autenticacaoController.login);
-
-router.get('/cadastro', (req, res) => {
-  res.render('cadastro'); // Se estiver direto na rota, tem de ser uma função (req, res) => {}
-});
-router.post('/cadastrar', autenticacaoController.cadastrar);
+router.get('/cadastro', autenticacaoController.renderizarCadastro);
+router.post('/cadastro', autenticacaoController.cadastrar);
+router.post('/logout', autenticacaoController.logout);
 
 module.exports = router;

@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const usuarioController = require('../controllers/usuarioController');
+const { administrador } = require('../middlewares/autenticacao');
 
-// Responde a GET /usuarios
+router.use(administrador);
 router.get('/', usuarioController.listar);
-
-// Responde a POST /usuarios/cadastrar
 router.post('/cadastrar', usuarioController.cadastrar);
 
 module.exports = router;

@@ -2,33 +2,83 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <div class="auth-split">
+    <!-- Lado Esquerdo -->
+    <div class="auth-hero">
+      <div class="auth-hero-brand">
+        <span>🎧</span> <span><span style="color:#60a5fa;">Up</span>Desk</span>
+      </div>
+      <p class="auth-hero-tagline">Seu suporte, sempre em evolução.</p>
 
-  <div class="card-cadastro">
-    <h2>Cadastro</h2>
+      <h1 class="auth-hero-title">Cadastre-se e faça<br><span>parte dessa solução!</span></h1>
+      <p style="color:#dbeafe; margin-bottom:32px; max-width:440px; font-size: 15px;">
+        Crie sua conta para abrir chamados, acompanhar atendimentos e se comunicar com a equipe de suporte.
+      </p>
 
-    <form action="/autenticacao/cadastrar" method="POST">
-      <div>
-        <input type="text" name="nome" placeholder="Nome" required>
-      </div>
-      <div>
-        <input type="email" name="email" placeholder="E-mail" required>
-      </div>
-      <div>
-        <input type="password" name="senha" placeholder="Senha" required>
-      </div>
-      
-      <!-- O campo de seleção de perfil foi removido. 
-           Agora todo registo público é automaticamente 'cliente'. -->
+      <ul class="auth-feature-list">
+        <li><span class="auth-feature-icon">✓</span> Acesso rápido e seguro</li>
+        <li><span class="auth-feature-icon">📊</span> Acompanhamento dos seus chamados</li>
+        <li><span class="auth-feature-icon">👥</span> Comunicação com a equipe</li>
+        <li><span class="auth-feature-icon">🛡️</span> Suporte mais eficiente</li>
+      </ul>
+    </div>
 
-      <div>
-        <a href="/autenticacao/login">Cancelar</a>
-        <button type="submit">Cadastrar</button>
+    <!-- Lado Direito -->
+    <div class="auth-form-side">
+      <div class="auth-card auth-card-wide">
+        <div class="auth-card-header">
+          <div style="font-size: 28px; font-weight: 800; color: #0f172a;">
+            🎧 <span style="color:#1a73e8;">Up</span>Desk
+          </div>
+          <h2>Criar conta</h2>
+          <p>Preencha os dados abaixo para se cadastrar.</p>
+        </div>
+
+        <% if (erro) { %>
+          <div class="alert-error"><%= erro %></div>
+        <% } %>
+
+        <form action="/autenticacao/cadastro" method="POST">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Nome completo <span class="req">*</span></label>
+              <input type="text" name="nome" class="form-control" placeholder="Seu nome completo" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">E-mail <span class="req">*</span></label>
+              <input type="email" name="email" class="form-control" placeholder="seuemail@empresa.com" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Senha <span class="req">*</span></label>
+              <input type="password" name="senha" class="form-control" placeholder="Digite sua senha" minlength="8" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Confirmar senha <span class="req">*</span></label>
+              <input type="password" name="confirmaSenha" class="form-control" placeholder="Confirme sua senha" minlength="8" required>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:14px; margin-top:24px;">
+            <a href="/autenticacao/login" class="btn btn-secondary" style="flex:1; padding: 14px;">Cancelar</a>
+            <button type="submit" class="btn btn-primary" style="flex:2; padding: 14px;">Cadastrar →</button>
+          </div>
+        </form>
+
+        <p style="text-align:center; margin-top:24px; font-size:13px; color:#64748b;">
+          Já tem uma conta? <a href="/autenticacao/login" style="font-weight:600;">Fazer login</a>
+        </p>
       </div>
-    </form>
+    </div>
   </div>
-
 </body>
 </html>

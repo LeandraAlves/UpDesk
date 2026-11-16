@@ -1,0 +1,17 @@
+<header class="topbar">
+  <div class="topbar-bell" title="Notificações">
+    🔔
+    <span class="badge-dot">3</span>
+  </div>
+
+  <% const nomeUser = (typeof usuario !== 'undefined' && usuario && usuario.nome) ? usuario.nome : 'Usuário'; %>
+  <% const perfilUser = (typeof usuario !== 'undefined' && usuario && usuario.perfil) ? usuario.perfil : 'admin'; %>
+
+  <div class="user-profile">
+    <div class="avatar-circle"><%= nomeUser.charAt(0).toUpperCase() %></div>
+    <div class="user-info">
+      <span class="user-name"><%= nomeUser %></span>
+      <span class="user-role"><%= perfilUser %></span>
+    </div>
+  </div>
+</header>

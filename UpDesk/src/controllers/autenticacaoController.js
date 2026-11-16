@@ -1,69 +1,91 @@
 const Usuario = require('../models/Usuario');
-const Categoria = require('../models/Categoria');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
-exports.renderizarLogin = (req, res) => {
-  res.render('login');
-};
+module.exports = {
+  renderizarLogin(req, res) {
+    return res.render('login', { erro: null, cadastro: req.query.cadastro });
+  },
 
-exports.renderizarCadastro = (req, res) => {
-  res.render('cadastro');
-};
+  renderizarCadastro(req, res) {
+    return res.render('cadastro', { erro: null });
+  },
 
-exports.login = async (req, res) => {
-  const { email, senha } = req.body;
-  
-  try {
-    const usuario = await Usuario.findOne({ where: { email } });
+  async cadastrar(req, res) {
+    const nome = typeof req.body.nome === 'string' ? req.body.nome.trim() : '';
+    const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+    const senha = typeof req.body.senha === 'string' ? req.body.senha : '';
+    const confirmaSenha = typeof req.body.confirmaSenha === 'string' ? req.body.confirmaSenha : '';
 
-    if (!usuario) {
-      return res.send('Utilizador não encontrado. <a href="/autenticacao/login">Voltar</a>');
+    if (!nome || !email || !senha || !confirmaSenha) {
+      return res.status(400).render('cadastro', { erro: 'Preencha todos os campos.' });
     }
 
-    const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
-
-    if (!senhaValida) {
-      return res.send('Senha incorreta. <a href="/autenticacao/login">Voltar</a>');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).render('cadastro', { erro: 'Informe um e-mail válido.' });
     }
 
-    // Guarda os dados na sessão
-    req.session.usuario = {
-      id: usuario.id,
-      nome: usuario.nome,
-      email: usuario.email,
-      perfil: usuario.perfil
-    };
-
-    // Se for cliente ou utilizador comum, vai direto para os chamados
-    if (usuario.perfil === 'cliente' || usuario.perfil === 'usuario') {
-      return res.redirect('/chamados');
+    if (senha !== confirmaSenha) {
+      return res.status(400).render('cadastro', { erro: 'As senhas não conferem.' });
     }
 
-    return res.redirect('/inicio');
-  } catch (erro) {
-    console.error('Erro no login:', erro);
-    return res.status(500).send('Erro interno no servidor.');
-  }
-};
+    if (senha.length < 8) {
+      return res.status(400).render('cadastro', { erro: 'A senha deve ter pelo menos 8 caracteres.' });
+    }
 
-exports.cadastrar = async (req, res) => {
-  const { nome, email, senha } = req.body;
-  
-  try {
-    const senha_hash = await bcrypt.hash(senha, 10);
-    let categoriaCliente = await Categoria.findOne({ where: { nome: 'Cliente' } });
+    try {
+      const senha_hash = await bcrypt.hash(senha, 12);
+      await Usuario.create({ nome, email, senha_hash, perfil: 'cliente' });
+      return res.redirect('/autenticacao/login?cadastro=sucesso');
+    } catch (erro) {
+      if (erro.name === 'SequelizeUniqueConstraintError') {
+        return res.status(409).render('cadastro', { erro: 'Este e-mail já está cadastrado.' });
+      }
 
-    await Usuario.create({
-      nome,
-      email,
-      senha_hash,
-      perfil: 'cliente', // Registo público sempre como cliente
-      categoriaId: categoriaCliente ? categoriaCliente.id : null
+      console.error('Erro ao cadastrar usuário:', erro);
+      return res.status(500).render('cadastro', { erro: 'Não foi possível concluir o cadastro.' });
+    }
+  },
+
+  async login(req, res) {
+    try {
+      const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+      const senha = typeof req.body.senha === 'string' ? req.body.senha : '';
+      const usuario = await Usuario.findOne({ where: { email } });
+      const senhaValida = usuario && await bcrypt.compare(senha, usuario.senha_hash);
+
+      if (!senhaValida) {
+        return res.status(401).render('login', { erro: 'E-mail ou senha inválidos.' });
+      }
+
+      req.session.regenerate((erro) => {
+        if (erro) {
+          console.error('Erro ao iniciar sessão:', erro);
+          return res.status(500).send('Não foi possível iniciar a sessão.');
+        }
+
+        req.session.usuario = {
+          id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          perfil: usuario.perfil
+        };
+
+        return res.redirect(usuario.perfil === 'cliente' ? '/chamados' : '/inicio');
+      });
+    } catch (erro) {
+      console.error('Erro crítico no login:', erro);
+      return res.status(500).render('login', { erro: 'Erro interno ao autenticar.' });
+    }
+  },
+
+  logout(req, res) {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Erro ao destruir sessão:', err);
+        return res.status(500).send('Não foi possível encerrar a sessão.');
+      }
+      res.clearCookie('connect.sid');
+      return res.redirect('/autenticacao/login');
     });
-
-    return res.redirect('/autenticacao/login');
-  } catch (erro) {
-    console.error('Erro ao cadastrar:', erro);
-    return res.status(500).send('Erro ao realizar o cadastro.');
   }
 };

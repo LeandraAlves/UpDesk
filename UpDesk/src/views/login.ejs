@@ -2,21 +2,76 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>UpDesk - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UpDesk - Entrar</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <h2>UpDesk - Entrar</h2>
-  <form action="/autenticacao/login" method="POST">
-    <div>
-      <label>E-mail:</label>
-      <input type="email" name="email" required>
+  <div class="auth-split">
+    <!-- Lado Esquerdo Institucional -->
+    <div class="auth-hero">
+      <div class="auth-hero-brand">
+        <span>🎧</span> <span><span style="color:#60a5fa;">Up</span>Desk</span>
+      </div>
+      <p class="auth-hero-tagline">Seu suporte, sempre em evolução.</p>
+
+      <h1 class="auth-hero-title">Mais <span>organização</span><br>para o seu dia a dia.</h1>
+
+      <ul class="auth-feature-list">
+        <li><span class="auth-feature-icon">✓</span> Abertura de chamados</li>
+        <li><span class="auth-feature-icon">📊</span> Acompanhamento em tempo real</li>
+        <li><span class="auth-feature-icon">👥</span> Comunicação com a equipe</li>
+        <li><span class="auth-feature-icon">🛡️</span> Mais eficiência no atendimento</li>
+      </ul>
     </div>
-    <div>
-      <label>Senha:</label>
-      <input type="password" name="senha" required>
+
+    <!-- Lado Direito Formulário -->
+    <div class="auth-form-side">
+      <div class="auth-card">
+        <div class="auth-card-header">
+          <div style="font-size: 28px; font-weight: 800; color: #0f172a;">
+            🎧 <span style="color:#1a73e8;">Up</span>Desk
+          </div>
+          <h2>Bem-vindo(a)!</h2>
+          <p>Acesse sua conta para continuar.</p>
+        </div>
+
+        <% if (typeof cadastro !== 'undefined' && cadastro === 'sucesso') { %>
+          <div class="badge badge-success" style="display:flex; margin-bottom:20px;">Conta criada. Faça login para continuar.</div>
+        <% } %>
+
+        <% if (typeof erro !== 'undefined' && erro) { %>
+          <div class="alert-error"><%= erro %></div>
+        <% } %>
+
+        <form action="/autenticacao/login" method="POST">
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input type="email" name="email" class="form-control" placeholder="seuemail@empresa.com" autocomplete="email" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input type="password" name="senha" class="form-control" placeholder="Digite sua senha" autocomplete="current-password" required>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; font-size:13px;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color: #475569; font-weight: 500;">
+              <input type="checkbox" checked style="width: 16px; height: 16px; accent-color: #1a73e8;"> Lembrar de mim
+            </label>
+            <a href="#" style="font-weight: 500; font-size: 13px;">Esqueceu a senha?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; font-size: 15px;">
+            Entrar →
+          </button>
+        </form>
+
+        <p style="text-align:center; margin-top:24px; font-size:13px; color:#64748b;">
+          Não tem uma conta? <a href="/autenticacao/cadastro" style="font-weight:600;">Cadastre-se</a>
+        </p>
+      </div>
     </div>
-    <button type="submit">Entrar</button>
-  </form>
-  <p><a href="/autenticacao/cadastro">Não tem conta? Cadastre-se</a></p>
+  </div>
 </body>
 </html>

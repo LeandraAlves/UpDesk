@@ -30,15 +30,19 @@ const Chamado = sequelize.define('Chamado', {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: { model: Departamento, key: 'id' }
+  },
+  tecnicoId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: Usuario, key: 'id' }
+  },
+  prazo: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'chamados',
   timestamps: true
 });
-
-// Associações
-Chamado.belongsTo(Usuario, { foreignKey: 'usuarioId', as: 'solicitante' });
-Chamado.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
-Chamado.belongsTo(Departamento, { foreignKey: 'departamentoId', as: 'departamento' });
 
 module.exports = Chamado;

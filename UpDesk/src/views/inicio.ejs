@@ -2,30 +2,102 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Início - UpDesk</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <div class="app-layout">
+    <%- include('partials/sidebar', { paginaAtiva: 'inicio' }) %>
 
-  <h1>Gestão do Sistema</h1>
+    <div class="main-wrapper">
+      <%- include('partials/topbar') %>
 
-  <div>
-    Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | 
-    <a href="/autenticacao/logout">Sair</a>
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Visão geral dos chamados e do atendimento</p>
+          </div>
+          <a href="/chamados" class="btn btn-primary">+ Ver Chamados</a>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-blue">
+            <div class="kpi-icon">📋</div>
+            <div>
+              <div class="kpi-label">Total de Chamados</div>
+              <div class="kpi-value"><%= typeof totalChamados !== 'undefined' ? totalChamados : '25' %></div>
+            </div>
+          </div>
+
+          <div class="kpi-card kpi-green">
+            <div class="kpi-icon">🕒</div>
+            <div>
+              <div class="kpi-label">Em Andamento</div>
+              <div class="kpi-value"><%= typeof emAndamento !== 'undefined' ? emAndamento : '8' %></div>
+            </div>
+          </div>
+
+          <div class="kpi-card kpi-yellow">
+            <div class="kpi-icon">⏳</div>
+            <div>
+              <div class="kpi-label">Aguardando</div>
+              <div class="kpi-value"><%= typeof aguardando !== 'undefined' ? aguardando : '5' %></div>
+            </div>
+          </div>
+
+          <div class="kpi-card kpi-red">
+            <div class="kpi-icon">✅</div>
+            <div>
+              <div class="kpi-label">Finalizados</div>
+              <div class="kpi-value"><%= typeof finalizados !== 'undefined' ? finalizados : '12' %></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acesso Rápido aos Módulos -->
+        <div class="card">
+          <h2 class="card-title">Acesso Rápido aos Módulos do Sistema</h2>
+          <p style="color:#64748b; margin-bottom:24px;">Selecione um dos módulos abaixo para gerenciar cadastros e atendimentos.</p>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:18px;">
+            <a href="/chamados" class="card" style="margin-bottom:0; display:flex; align-items:center; gap:16px; border: 1px solid #e2e8f0; transition: all 0.2s;">
+              <div style="background:#e0effe; color:#1a73e8; width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">📋</div>
+              <div>
+                <strong style="color:#0f172a; display:block; font-size: 15px;">Chamados</strong>
+                <span style="font-size:12px; color:#64748b;">Gerir solicitações</span>
+              </div>
+            </a>
+
+            <a href="/categorias" class="card" style="margin-bottom:0; display:flex; align-items:center; gap:16px; border: 1px solid #e2e8f0; transition: all 0.2s;">
+              <div style="background:#dcfce7; color:#16a34a; width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">🗂️</div>
+              <div>
+                <strong style="color:#0f172a; display:block; font-size: 15px;">Categorias</strong>
+                <span style="font-size:12px; color:#64748b;">Tipos de atendimento</span>
+              </div>
+            </a>
+
+            <a href="/departamentos" class="card" style="margin-bottom:0; display:flex; align-items:center; gap:16px; border: 1px solid #e2e8f0; transition: all 0.2s;">
+              <div style="background:#fef3c7; color:#d97706; width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">🏢</div>
+              <div>
+                <strong style="color:#0f172a; display:block; font-size: 15px;">Departamentos</strong>
+                <span style="font-size:12px; color:#64748b;">Setores da empresa</span>
+              </div>
+            </a>
+
+            <a href="/usuarios" class="card" style="margin-bottom:0; display:flex; align-items:center; gap:16px; border: 1px solid #e2e8f0; transition: all 0.2s;">
+              <div style="background:#f3e8ff; color:#7e22ce; width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">👥</div>
+              <div>
+                <strong style="color:#0f172a; display:block; font-size: 15px;">Usuários</strong>
+                <span style="font-size:12px; color:#64748b;">Contas e permissões</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </main>
+    </div>
   </div>
-
-  <br>
-
-  <!-- Menu de Navegação Limpo -->
-  <nav>
-    <a href="/categorias">Categorias</a> | 
-    <a href="/departamentos">Departamentos</a> | 
-    <a href="/usuarios">Usuários</a>
-  </nav>
-
-  <hr>
-
-  <!-- Painel limpo sem formulários ou tabelas -->
-  <p>Selecione uma das opções acima para gerir os módulos do sistema.</p>
-
 </body>
 </html>

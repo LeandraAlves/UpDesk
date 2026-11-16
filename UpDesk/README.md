@@ -5,7 +5,7 @@
 **Professor:** Raffael Carvalho  
 **Entrega:** Release 1 — Concepção (proposta para aprovação)
 
-> **Status:** Proposta de projeto. As funcionalidades descritas ainda estão planejadas, não implementadas. A aprovação do tema depende do professor.
+> **Status:** Fundação da Release 2 em implementação. O projeto já possui telas EJS, servidor Express, conexão MySQL/Sequelize e os fluxos iniciais descritos abaixo; funcionalidades ainda não marcadas como concluídas permanecem pendentes.
 
 ## 1. Equipe e papéis
 
@@ -48,15 +48,16 @@ Todos os integrantes deverão contribuir com commits e compreender o funcionamen
 ## 4. Checklist dos requisitos obrigatórios
 
 - [ ] **8 telas distintas:** Login, Cadastro, Dashboard, Chamados, Novo Chamado, Detalhes/Edição, Categorias e Departamentos.
-- [ ] **4 entidades de negócio além de Usuário:** Chamado, Categoria, Departamento, Comentário e Etiqueta (cinco planejadas).
+- [x] **5 entidades de negócio além de Usuário:** Chamado, Categoria, Departamento, Comentário e Etiqueta.
+- [x] **Primeiro CRUD:** Categorias (criar, listar, editar e excluir pela interface).
 - [ ] **3 CRUDs completos pela interface:** Chamados (abrir, listar, editar e excluir/cancelar conforme regra), Categorias e Departamentos (criar, listar, editar e excluir quando não houver dependências).
-- [ ] **Relacionamento 1:N:** Departamento → Chamados.
-- [ ] **Relacionamento N:N:** Chamados ↔ Etiquetas, com tabela intermediária.
+- [x] **Relacionamento 1:N:** Departamento → Chamados.
+- [x] **Relacionamento N:N:** Chamados ↔ Etiquetas, com tabela intermediária.
 - [ ] **Regra de negócio:** prazo calculado conforme prioridade (ex.: alta: 1 dia útil; média: 3 dias úteis; baixa: 5 dias úteis), com alerta de atraso; valores sujeitos à aprovação da equipe.
 - [ ] **Busca/filtro e paginação:** na listagem de chamados.
-- [ ] **Autenticação:** cadastro, login e logout; senhas armazenadas com hash.
+- [x] **Autenticação:** cadastro, login e logout; senhas armazenadas com hash.
 - [ ] **Autorização:** dois perfis obrigatórios (Administrador e Usuário), validados no backend. O administrador gerencia categorias, departamentos e responsáveis; o usuário abre e acompanha seus chamados. O papel de técnico será uma atribuição de atendimento, a detalhar.
-- [ ] **Proteção:** telas e endpoints privados acessíveis somente após autenticação.
+- [x] **Proteção:** telas e endpoints privados acessíveis somente após autenticação.
 - [ ] **Validação:** validação no backend com mensagens claras.
 - [ ] **Boas práticas:** Sequelize (ORM), variáveis de ambiente em `.env` fora do Git e consultas seguras.
 - [ ] **Git:** repositório, README, commits de todos os membros.
@@ -87,6 +88,14 @@ Todos os integrantes deverão contribuir com commits e compreender o funcionamen
 | Sequelize | Models, relacionamentos e operações de banco com ORM |
 | Arquitetura MVC | Separação entre Model, View e Controller |
 | Git e GitHub | Versionamento e colaboração |
+
+### Executar localmente
+
+1. Instale as dependências com `npm install` e crie um banco MySQL (por padrão, `updesk_db`).
+2. Configure as variáveis de ambiente `DB_HOST`, `DB_NOME`, `DB_USUARIO`, `DB_SENHA` e `SESSION_SECRET`. Para uso local, o host é `localhost`; em produção, `SESSION_SECRET` é obrigatório.
+3. Inicie o servidor com `node app.js`. O Sequelize sincroniza os modelos antes de iniciar o servidor.
+
+Os modelos e associações ficam em `src/models`; tabelas e chaves são sincronizadas pelo Sequelize na inicialização.
 
 ## 7. Esboço das telas
 

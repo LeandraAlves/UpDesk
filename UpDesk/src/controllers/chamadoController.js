@@ -5,7 +5,11 @@ const Departamento = require('../models/Departamento');
 
 exports.listar = async (req, res) => {
   try {
+    const where = ['admin', 'gerencia'].includes(req.session.usuario.perfil)
+      ? {}
+      : { usuarioId: req.session.usuario.id };
     const chamados = await Chamado.findAll({
+      where,
       include: [
         { model: Usuario, as: 'solicitante' },
         { model: Categoria, as: 'categoria' },
@@ -16,14 +20,12 @@ exports.listar = async (req, res) => {
 
     const categorias = await Categoria.findAll();
     const departamentos = await Departamento.findAll();
-    const usuarios = await Usuario.findAll();
 
     res.render('chamados', {
-      usuario: req.session.usuario || { id: 1, nome: 'Gerencia', perfil: 'admin' },
+      usuario: req.session.usuario,
       chamados,
       categorias,
-      departamentos,
-      usuarios
+      departamentos
     });
   } catch (erro) {
     console.error(erro);
@@ -32,17 +34,14 @@ exports.listar = async (req, res) => {
 };
 
 exports.cadastrar = async (req, res) => {
-  const { titulo, descricao, prioridade, categoriaId, departamentoId, usuarioId } = req.body;
+  const { titulo, descricao, prioridade, categoriaId, departamentoId } = req.body;
   try {
-    // Usa o ID do solicitante escolhido no form ou o ID do usuário logado na sessão
-    const idSolicitante = usuarioId || (req.session.usuario ? req.session.usuario.id : 1);
-
     await Chamado.create({
       titulo,
       descricao,
       prioridade,
       status: 'aberto',
-      usuarioId: idSolicitante,
+      usuarioId: req.session.usuario.id,
       categoriaId: categoriaId || null,
       departamentoId: departamentoId || null
     });

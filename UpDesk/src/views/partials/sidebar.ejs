@@ -1,0 +1,44 @@
+<aside class="sidebar">
+  <div class="brand-logo">
+    <span class="logo-icon">🎧</span>
+    <div><span class="accent">Up</span>Desk</div>
+  </div>
+
+  <nav class="nav-menu">
+    <% const rotaAtiva = typeof paginaAtiva !== 'undefined' ? paginaAtiva : ''; %>
+    <% const perfilUser = (typeof usuario !== 'undefined' && usuario) ? usuario.perfil : 'admin'; %>
+
+    <% if (perfilUser === 'admin' || perfilUser === 'gerencia') { %>
+      <a href="/inicio" class="nav-item <%= rotaAtiva === 'inicio' ? 'active' : '' %>">
+        <span>🏠</span> Dashboard
+      </a>
+    <% } %>
+
+    <a href="/chamados" class="nav-item <%= rotaAtiva === 'chamados' ? 'active' : '' %>">
+      <span>📋</span> Meus Chamados
+    </a>
+
+    <% if (perfilUser === 'admin' || perfilUser === 'gerencia') { %>
+      <a href="/categorias" class="nav-item <%= rotaAtiva === 'categorias' ? 'active' : '' %>">
+        <span>🗂️</span> Categorias
+      </a>
+      <a href="/departamentos" class="nav-item <%= rotaAtiva === 'departamentos' ? 'active' : '' %>">
+        <span>🏢</span> Departamentos
+      </a>
+      <a href="/usuarios" class="nav-item <%= rotaAtiva === 'usuarios' ? 'active' : '' %>">
+        <span>👥</span> Usuários
+      </a>
+      <a href="/ti/chamados-abertos" class="nav-item <%= rotaAtiva === 'ti' ? 'active' : '' %>">
+        <span>📊</span> Painel TI
+      </a>
+    <% } %>
+  </nav>
+
+  <div class="sidebar-footer">
+    <form action="/autenticacao/logout" method="POST">
+      <button type="submit" class="nav-item" style="width:100%; background:transparent; border:0; text-align:left; cursor:pointer; color:#fca5a5; font:inherit;">
+        <span>🚪</span> Sair
+      </button>
+    </form>
+  </div>
+</aside>

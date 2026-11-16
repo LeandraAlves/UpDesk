@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/banco');
 const Categoria = require('./Categoria');
+const Departamento = require('./Departamento');
 
 const Usuario = sequelize.define('Usuario', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
@@ -18,13 +19,18 @@ const Usuario = sequelize.define('Usuario', {
       model: Categoria,
       key: 'id'
     }
+  },
+  departamentoId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: Departamento,
+      key: 'id'
+    }
   }
 }, {
   tableName: 'usuarios',
   timestamps: true
 });
-
-Usuario.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
-Categoria.hasMany(Usuario, { foreignKey: 'categoriaId', as: 'usuarios' });
 
 module.exports = Usuario;

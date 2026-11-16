@@ -2,70 +2,81 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Gestão de Departamentos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Departamentos - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <div class="app-layout">
+    <%- include('../partials/sidebar', { paginaAtiva: 'departamentos' }) %>
 
-  <h1>Gestão do Sistema</h1>
-  
-  <div>
-    <% if (typeof usuario !== 'undefined' && usuario) { %>
-      Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | 
-    <% } else { %>
-      Bem-vindo, <strong>Gerencia</strong> (admin) | 
-    <% } %>
-    <a href="/autenticacao/logout">Sair</a>
+    <div class="main-wrapper">
+      <%- include('../partials/topbar') %>
+
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Departamentos</h1>
+            <p class="page-subtitle">Gerencie os departamentos da empresa para organização dos chamados.</p>
+          </div>
+        </div>
+
+        <div class="split-grid">
+          <!-- Lista de Departamentos (Esquerda) -->
+          <div class="card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nome do Departamento</th>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (typeof departamentos !== 'undefined' && departamentos.length > 0) { %>
+                    <% departamentos.forEach(dep => { %>
+                      <tr>
+                        <td><%= dep.id %></td>
+                        <td><strong><%= dep.nome %></strong></td>
+                        <td style="color:#64748b;"><%= dep.descricao || 'Sem descrição' %></td>
+                        <td><span class="badge badge-success">Ativo</span></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="4" style="text-align:center; padding:32px; color:#64748b;">Nenhum departamento cadastrado.</td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Painel Lateral Novo Departamento (Direita) -->
+          <div class="card" style="border-top: 4px solid #1a73e8;">
+            <h2 class="card-title">Novo Departamento</h2>
+            <form action="/departamentos/novo" method="POST">
+              <div class="form-group">
+                <label class="form-label">Nome do Departamento <span class="req">*</span></label>
+                <input type="text" name="nome" class="form-control" placeholder="Digite o nome do departamento" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <textarea name="descricao" class="form-control" placeholder="Descreva o departamento..."></textarea>
+              </div>
+
+              <div style="display:flex; gap:12px; margin-top:24px;">
+                <button type="reset" class="btn btn-secondary" style="flex:1;">Limpar</button>
+                <button type="submit" class="btn btn-primary" style="flex:1;">💾 Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
   </div>
-
-  <nav>
-    <a href="/categorias">Categorias</a> | 
-    <a href="/departamentos">Departamentos</a>
-  </nav>
-
-  <hr>
-
-  <h2>Novo Departamento</h2>
-  <form action="/departamentos/novo" method="POST">
-    <div>
-      <input type="text" name="nome" placeholder="Nome do Departamento" required />
-    </div>
-    <div>
-      <input type="text" name="descricao" placeholder="Descrição (Opcional)" />
-    </div>
-    <div>
-      <button type="submit">Salvar</button>
-    </div>
-  </form>
-
-  <hr>
-
-  <h2>Departamentos Cadastrados</h2>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>Descrição</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% if (typeof departamentos !== 'undefined' && departamentos.length > 0) { %>
-        <% departamentos.forEach(dep => { %>
-          <tr>
-            <td><%= dep.id %></td>
-            <td><%= dep.nome %></td>
-            <td><%= dep.descricao || '-' %></td>
-            <td>-</td>
-          </tr>
-        <% }) %>
-      <% } else { %>
-        <tr>
-          <td colspan="4">Nenhum departamento cadastrado.</td>
-        </tr>
-      <% } %>
-    </tbody>
-  </table>
-
 </body>
 </html>

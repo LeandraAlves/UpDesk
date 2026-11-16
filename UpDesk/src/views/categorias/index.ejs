@@ -2,67 +2,96 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Categorias - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <div class="app-layout">
+    <%- include('../partials/sidebar', { paginaAtiva: 'categorias' }) %>
 
-  <h1>Gestão do Sistema</h1>
+    <div class="main-wrapper">
+      <%- include('../partials/topbar') %>
 
-  <div>
-    Bem-vindo, <strong><%= usuario.nome %></strong> (<%= usuario.perfil %>) | 
-    <a href="/inicio">Início</a> | 
-    <a href="/autenticacao/logout">Sair</a>
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Categorias</h1>
+            <p class="page-subtitle">Gerencie as categorias de chamados do sistema.</p>
+          </div>
+        </div>
+
+        <div class="split-grid">
+          <!-- Tabela de Categorias (Esquerda) -->
+          <div class="card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nome da Categoria</th>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (typeof categorias !== 'undefined' && categorias.length > 0) { %>
+                    <% categorias.forEach(cat => { %>
+                      <tr>
+                        <td><%= cat.id %></td>
+                        <td>
+                          <form id="categoria-editar-<%= cat.id %>" action="/categorias/editar/<%= cat.id %>" method="POST">
+                            <input type="text" name="nome" class="form-control" value="<%= cat.nome %>" aria-label="Nome da categoria" required>
+                          </form>
+                        </td>
+                        <td>
+                          <input type="text" name="descricao" form="categoria-editar-<%= cat.id %>" class="form-control" value="<%= cat.descricao || '' %>" aria-label="Descrição da categoria">
+                        </td>
+                        <td><span class="badge badge-success">Ativa</span></td>
+                        <td>
+                          <div style="display:flex; gap:8px; align-items:center;">
+                            <button type="submit" form="categoria-editar-<%= cat.id %>" class="btn btn-secondary btn-sm">Salvar</button>
+                            <form action="/categorias/excluir/<%= cat.id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir esta categoria?')">
+                              <button type="submit" class="btn-danger-icon">🗑️ Excluir</button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="5" style="text-align:center; padding:32px; color:#64748b;">Nenhuma categoria cadastrada.</td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Painel Lateral Nova Categoria (Direita) -->
+          <div class="card" style="border-top: 4px solid #1a73e8;">
+            <h2 class="card-title">Nova Categoria</h2>
+            <form action="/categorias/cadastrar" method="POST">
+              <div class="form-group">
+                <label class="form-label">Nome da Categoria <span class="req">*</span></label>
+                <input type="text" name="nome" class="form-control" placeholder="Digite o nome da categoria" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <textarea name="descricao" class="form-control" placeholder="Descreva a categoria..."></textarea>
+              </div>
+
+              <div style="display:flex; gap:12px; margin-top:24px;">
+                <button type="reset" class="btn btn-secondary" style="flex:1;">Limpar</button>
+                <button type="submit" class="btn btn-primary" style="flex:1;">💾 Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
   </div>
-
-  <br>
-
-  <nav>
-    <a href="/categorias">Categorias</a> | 
-    <a href="/departamentos">Departamentos</a> | 
-    <a href="/usuarios">Usuários</a> | 
-    <a href="/chamados">Chamados</a>
-  </nav>
-
-  <hr>
-
-  <h2>Nova Categoria</h2>
-
-  <form action="/categorias/cadastrar" method="POST">
-    <div>
-      <input type="text" name="nome" placeholder="Nome da Categoria" required>
-    </div>
-    <div>
-      <input type="text" name="descricao" placeholder="Descrição (Opcional)">
-    </div>
-    <button type="submit">Salvar</button>
-  </form>
-
-  <hr>
-
-  <h2>Categorias Cadastradas</h2>
-
-  <table border="1">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>Descrição</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% categorias.forEach(cat => { %>
-        <tr>
-          <td><%= cat.id %></td>
-          <td><%= cat.nome %></td>
-          <td><%= cat.descricao || '-' %></td>
-          <td>
-            <a href="/categorias/excluir/<%= cat.id %>" onclick="return confirm('Tens a certeza que pretendes excluir esta categoria?')">Excluir</a>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
-
 </body>
 </html>
