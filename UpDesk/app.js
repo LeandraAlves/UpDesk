@@ -53,16 +53,21 @@ app.use('/usuarios', usuarioRotas);
 app.use('/chamados', chamadoRotas);
 app.use('/ti', tiRotas);
 
-// --- SINCRONIZAÇÃO COM O BANCO E START DO SERVIDOR ---
-const PORT = process.env.PORT || 3000;
-
+// --- SINCRONIZAÇÃO COM O BANCO ---
 sequelize.sync({ alter: true })
   .then(() => {
     console.log('Banco de dados sincronizado com sucesso.');
-    app.listen(PORT, () => {
-      console.log(`Servidor a correr em http://localhost:${PORT}`);
-    });
   })
   .catch(err => {
     console.error('Erro ao conectar com o banco de dados:', err);
   });
+
+// Inicialização local (apenas fora da Vercel)
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Servidor a correr em http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
