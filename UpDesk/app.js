@@ -2,23 +2,65 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const sequelize = require('./src/config/banco');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
 const app = express();
+const production = process.env.NODE_ENV === 'production';
+const sessionSecret = process.env.SESSION_SECRET ||
+  (production ? null : 'updesk-local-development-secret-change-me');
+
+if (!sessionSecret) {
+  throw new Error('Defina SESSION_SECRET nas variáveis de ambiente de produção.');
+}
+
+app.set('trust proxy', 1);
 
 // Configuração do EJS como template engine e views
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src', 'views'));
+app.use(express.static(path.join(__dirname, 'src', 'public')));
 
 // Middlewares para leitura de dados de formulários e JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Configuração da Sessão
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+  tableName: 'sessions',
+  expiration: 24 * 60 * 60 * 1000
+});
+
+let erroInicializacao = null;
+const bancoPronto = sequelize.sync()
+  .then(() => sessionStore.sync())
+  .then(() => {
+    console.log('Banco de dados sincronizado com sucesso.');
+  })
+  .catch((erro) => {
+    erroInicializacao = erro;
+    console.error('Erro ao preparar o banco de dados:', erro);
+  });
+
+app.use(async (req, res, next) => {
+  await bancoPronto;
+  if (erroInicializacao) {
+    return res.status(503).send('Serviço temporariamente indisponível.');
+  }
+  return next();
+});
+
 app.use(session({
-  secret: 'updesk_secret_key',
+  secret: sessionSecret,
+  store: sessionStore,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  proxy: production,
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: production,
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 
 // --- IMPORTAÇÃO DE ROTAS ---
@@ -53,20 +95,15 @@ app.use('/usuarios', usuarioRotas);
 app.use('/chamados', chamadoRotas);
 app.use('/ti', tiRotas);
 
-// --- SINCRONIZAÇÃO COM O BANCO ---
-sequelize.sync({ alter: true })
-  .then(() => {
-    console.log('Banco de dados sincronizado com sucesso.');
-  })
-  .catch(err => {
-    console.error('Erro ao conectar com o banco de dados:', err);
-  });
-
 // Inicialização local (apenas fora da Vercel)
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`Servidor a correr em http://localhost:${PORT}`);
+if (!production) {
+  const PORT = Number(process.env.PORT) || 3000;
+  bancoPronto.then(() => {
+    if (!erroInicializacao) {
+      app.listen(PORT, () => {
+        console.log(`Servidor a correr em http://localhost:${PORT}`);
+      });
+    }
   });
 }
 

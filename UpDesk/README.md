@@ -169,3 +169,13 @@ erDiagram
 ---
 
 **Uso de IA:** A IA foi utilizado como apoio à organização e redação da proposta da Release 1.
+
+## Deploy no Vercel
+
+1. Configure o **Root Directory** do projeto Vercel como `UpDesk` (a pasta que contém este `package.json` e `vercel.json`).
+2. Em **Settings → Environment Variables**, cadastre `DB_HOST`, `DB_PORT`, `DB_NOME`, `DB_USUARIO`, `DB_SENHA` e `SESSION_SECRET`. Use os valores do provedor do banco; não envie o arquivo `.env` ao Git nem coloque credenciais no repositório.
+3. Gere um segredo de sessão forte localmente com `node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"` e cadastre a saída como `SESSION_SECRET` no Vercel. Use o mesmo valor nos ambientes de produção necessários.
+4. Garanta que o MySQL aceite conexões de saída do Vercel. As tabelas da aplicação e de sessões são criadas na primeira inicialização.
+5. O arquivo `.env.example` contém apenas nomes e valores de exemplo; copie-o para `.env` no desenvolvimento local e substitua os valores. O `.env` real permanece ignorado pelo Git.
+
+O Vercel executa o `app.js` como função Node, mantém sessões no MySQL e aguarda a inicialização do banco antes de processar as rotas.
