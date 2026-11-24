@@ -6,5 +6,6 @@ const { administrador } = require('../middlewares/autenticacao');
 router.use(administrador);
 router.get('/', usuarioController.listar);
 router.post('/cadastrar', usuarioController.cadastrar);
+router.post('/excluir/:id', usuarioController.excluir);
 
 module.exports = router;

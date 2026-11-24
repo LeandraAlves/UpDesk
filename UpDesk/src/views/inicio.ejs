@@ -3,98 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - UpDesk</title>
+  <title>Início - UpDesk</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <div class="app-layout">
     <%- include('partials/sidebar', { paginaAtiva: 'inicio' }) %>
-
     <div class="main-wrapper">
       <%- include('partials/topbar') %>
-
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Dashboard</h1>
+            <h1 class="page-title">Início</h1>
             <p class="page-subtitle">Visão geral dos chamados e do atendimento</p>
           </div>
-          <a href="/chamados" class="btn btn-primary">+ Ver Chamados</a>
+          <div class="form-actions no-print">
+            <button type="button" class="btn btn-secondary" onclick="window.print()">Exportar PDF</button>
+            <a href="/chamados" class="btn btn-primary">Ver chamados</a>
+          </div>
         </div>
 
-        <!-- KPI Cards -->
         <div class="kpi-grid">
-          <div class="kpi-card kpi-blue">
-            <div class="kpi-icon">📋</div>
-            <div>
-              <div class="kpi-label">Total de Chamados</div>
-              <div class="kpi-value"><%= typeof totalChamados !== 'undefined' ? totalChamados : '25' %></div>
-            </div>
-          </div>
-
-          <div class="kpi-card kpi-green">
-            <div class="kpi-icon">🕒</div>
-            <div>
-              <div class="kpi-label">Em Andamento</div>
-              <div class="kpi-value"><%= typeof emAndamento !== 'undefined' ? emAndamento : '8' %></div>
-            </div>
-          </div>
-
-          <div class="kpi-card kpi-yellow">
-            <div class="kpi-icon">⏳</div>
-            <div>
-              <div class="kpi-label">Aguardando</div>
-              <div class="kpi-value"><%= typeof aguardando !== 'undefined' ? aguardando : '5' %></div>
-            </div>
-          </div>
-
-          <div class="kpi-card kpi-red">
-            <div class="kpi-icon">✅</div>
-            <div>
-              <div class="kpi-label">Finalizados</div>
-              <div class="kpi-value"><%= typeof finalizados !== 'undefined' ? finalizados : '12' %></div>
-            </div>
-          </div>
+          <a class="kpi-card kpi-blue" href="/chamados"><div class="kpi-icon">▤</div><div><div class="kpi-label">Total de chamados</div><div class="kpi-value"><%= totalChamados %></div></div></a>
+          <a class="kpi-card kpi-green" href="/chamados?status=em_andamento"><div class="kpi-icon">◷</div><div><div class="kpi-label">Em andamento</div><div class="kpi-value"><%= emAndamento %></div></div></a>
+          <a class="kpi-card kpi-yellow" href="/chamados?status=aguardando"><div class="kpi-icon">⌛</div><div><div class="kpi-label">Aguardando</div><div class="kpi-value"><%= aguardando %></div></div></a>
+          <a class="kpi-card kpi-red" href="/chamados?status=fechado"><div class="kpi-icon">✓</div><div><div class="kpi-label">Resolvidos</div><div class="kpi-value"><%= finalizados %></div></div></a>
         </div>
 
-        <!-- Acesso Rápido aos Módulos -->
-        <div class="card">
-          <h2 class="card-title">Acesso Rápido aos Módulos do Sistema</h2>
-          <p style="color:#64748b; margin-bottom:24px;">Selecione um dos módulos abaixo para gerenciar cadastros e atendimentos.</p>
-
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:18px;">
-            <a href="/chamados" class="card" style="margin-bottom:0; display:flex; align-items:center; gap:16px; border: 1px solid #e2e8f0; transition: all 0.2s;">
-              <div style="background:#e0effe; color:#1a73e8; width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">📋</div>
-              <div>
-                <strong style="color:#0f172a; display:block; font-size: 15px;">Chamados</strong>
-                <span style="font-size:12px; color:#64748b;">Gerir solicitações</span>
+        <%
+          const coresStatus = ['#1a73e8', '#10b981', '#f59e0b', '#ef4444', '#94a3b8'];
+          const totalStatus = statusChart.reduce((soma, item) => soma + item.total, 0);
+          let cursorStatus = 0;
+          const partesDonut = statusChart.map((item, index) => {
+            const inicio = totalStatus ? cursorStatus / totalStatus * 100 : 0;
+            cursorStatus += item.total;
+            const fim = totalStatus ? cursorStatus / totalStatus * 100 : 0;
+            return `${coresStatus[index % coresStatus.length]} ${inicio}% ${fim}%`;
+          });
+        %>
+        <div class="dashboard-charts">
+          <section class="card chart-card">
+            <h2 class="card-title">Chamados por status</h2>
+            <div class="donut-layout">
+              <div class="status-donut" style="background:conic-gradient(<%= partesDonut.length ? partesDonut.join(',') : '#e2e8f0 0 100%' %>)">
+                <div class="donut-center"><strong><%= totalStatus %></strong><span>Total</span></div>
               </div>
-            </a>
+              <ul class="chart-legend">
+                <% statusChart.forEach((item, index) => { %>
+                  <li><a href="/chamados?status=<%= encodeURIComponent(item.status) %>"><span><i style="background:<%= coresStatus[index % coresStatus.length] %>"></i><%= item.nome %></span><strong><%= item.total %><%= totalStatus ? ` (${Math.round(item.total / totalStatus * 100)}%)` : '' %></strong></a></li>
+                <% }) %>
+                <% if (!statusChart.length) { %><li class="text-muted">Sem chamados registrados.</li><% } %>
+              </ul>
+            </div>
+          </section>
 
-            <a href="/categorias" class="card" style="margin-bottom:0; display:flex; align-items:center; gap:16px; border: 1px solid #e2e8f0; transition: all 0.2s;">
-              <div style="background:#dcfce7; color:#16a34a; width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">🗂️</div>
-              <div>
-                <strong style="color:#0f172a; display:block; font-size: 15px;">Categorias</strong>
-                <span style="font-size:12px; color:#64748b;">Tipos de atendimento</span>
+          <section class="card chart-card">
+            <h2 class="card-title">Chamados por categoria</h2>
+            <% if (categoriasChart.length) { %>
+              <div class="bar-chart">
+                <% categoriasChart.forEach(item => { %>
+                  <a class="bar-chart-item" href="/chamados?categoriaId=<%= item.id %>"><div class="bar-chart-value"><%= item.total %></div><div class="bar-chart-track"><span style="height:<%= item.percent %>%"></span></div><div class="bar-chart-label" title="<%= item.nome %>"><%= item.nome %></div></a>
+                <% }) %>
               </div>
-            </a>
+            <% } else { %><p class="text-muted">Sem dados de categoria.</p><% } %>
+          </section>
 
-            <a href="/departamentos" class="card" style="margin-bottom:0; display:flex; align-items:center; gap:16px; border: 1px solid #e2e8f0; transition: all 0.2s;">
-              <div style="background:#fef3c7; color:#d97706; width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">🏢</div>
-              <div>
-                <strong style="color:#0f172a; display:block; font-size: 15px;">Departamentos</strong>
-                <span style="font-size:12px; color:#64748b;">Setores da empresa</span>
+          <section class="card chart-card">
+            <h2 class="card-title">Chamados por departamento</h2>
+            <% if (departamentosChart.length) { %>
+              <div class="bar-chart bar-chart-green">
+                <% departamentosChart.forEach(item => { %>
+                  <a class="bar-chart-item" href="/chamados?departamentoId=<%= item.id %>"><div class="bar-chart-value"><%= item.total %></div><div class="bar-chart-track"><span style="height:<%= item.percent %>%"></span></div><div class="bar-chart-label" title="<%= item.nome %>"><%= item.nome %></div></a>
+                <% }) %>
               </div>
-            </a>
+            <% } else { %><p class="text-muted">Sem dados de departamento.</p><% } %>
+          </section>
+        </div>
 
-            <a href="/usuarios" class="card" style="margin-bottom:0; display:flex; align-items:center; gap:16px; border: 1px solid #e2e8f0; transition: all 0.2s;">
-              <div style="background:#f3e8ff; color:#7e22ce; width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">👥</div>
-              <div>
-                <strong style="color:#0f172a; display:block; font-size: 15px;">Usuários</strong>
-                <span style="font-size:12px; color:#64748b;">Contas e permissões</span>
-              </div>
-            </a>
+        <section class="card">
+          <div class="section-heading">
+            <h2 class="card-title">Últimos chamados</h2>
+            <a href="/chamados">Ver todos</a>
           </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>Título</th><th>Categoria</th><th>Departamento</th><th>Status</th><th>Prioridade</th><th>Data</th><th></th></tr></thead>
+              <tbody>
+                <% if (ultimosChamados.length) { %>
+                  <% ultimosChamados.forEach(chamado => { %>
+                    <tr>
+                      <td><strong><%= String(chamado.id).padStart(3, '0') %></strong></td>
+                      <td><%= chamado.titulo %></td>
+                      <td><%= chamado.categoria ? chamado.categoria.nome : '—' %></td>
+                      <td><%= chamado.departamento ? chamado.departamento.nome : '—' %></td>
+                      <td><span class="badge badge-info"><%= {aberto:'Em aberto', em_andamento:'Em andamento', aguardando:'Aguardando', fechado:'Resolvido', cancelado:'Cancelado'}[chamado.status] %></span></td>
+                      <td><%= chamado.prioridade %></td>
+                      <td><%= new Date(chamado.createdAt).toLocaleDateString('pt-BR') %></td>
+                      <td><a href="/chamados/<%= chamado.id %>" class="btn btn-secondary btn-sm">Ver</a></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %><tr><td colspan="8" class="table-empty">Nenhum chamado cadastrado.</td></tr><% } %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="overdue-banner">
+          <span class="overdue-icon">!</span>
+          <div><strong>Chamados em atraso</strong><p><%= atrasados %> chamado(s) com prazo vencido</p></div>
+          <a href="/chamados">Ver fila →</a>
         </div>
       </main>
     </div>

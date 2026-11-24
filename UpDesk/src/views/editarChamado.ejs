@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar chamado #<%= chamado.id %> - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <%- include('partials/sidebar', { paginaAtiva: 'chamados' }) %>
+    <div class="main-wrapper">
+      <%- include('partials/topbar') %>
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Editar chamado #<%= String(chamado.id).padStart(3, '0') %></h1>
+            <p class="page-subtitle">Atualize os dados e o andamento da solicitação.</p>
+          </div>
+          <a href="/chamados/<%= chamado.id %>" class="btn btn-secondary">Voltar aos detalhes</a>
+        </div>
+
+        <% if (erro) { %><div class="alert-error"><%= erro %></div><% } %>
+
+        <form action="/chamados/editar/<%= chamado.id %>" method="POST" class="card">
+          <div class="form-group">
+            <label for="titulo" class="form-label">Título <span class="req">*</span></label>
+            <input id="titulo" name="titulo" class="form-control" maxlength="150" value="<%= chamado.titulo %>" required>
+          </div>
+          <div class="form-group">
+            <label for="descricao" class="form-label">Descrição <span class="req">*</span></label>
+            <textarea id="descricao" name="descricao" class="form-control" maxlength="5000" rows="6" required><%= chamado.descricao %></textarea>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="categoriaId" class="form-label">Categoria <span class="req">*</span></label>
+              <select id="categoriaId" name="categoriaChamadoId" class="form-control" required onchange="atualizarDepartamento()">
+                <option value="">Selecione uma categoria</option>
+                <% categorias.forEach(categoria => { %><option value="<%= categoria.id %>" data-departamento="<%= categoria.departamento ? categoria.departamento.nome : '' %>" <%= chamado.categoriaChamadoId === categoria.id ? 'selected' : '' %>><%= categoria.nome %></option><% }) %>
+              </select>
+            </div>
+            <div class="form-group">
+              <span class="form-label">Departamento responsável</span>
+              <p id="departamentoCategoria" class="form-control" aria-live="polite"><%= chamado.departamento ? chamado.departamento.nome : 'Selecione uma categoria.' %></p>
+            </div>
+            <div class="form-group">
+              <label for="prioridade" class="form-label">Prioridade</label>
+              <select id="prioridade" name="prioridade" class="form-control" required>
+                <option value="baixa" <%= chamado.prioridade === 'baixa' ? 'selected' : '' %>>Baixa</option>
+                <option value="media" <%= chamado.prioridade === 'media' ? 'selected' : '' %>>Média</option>
+                <option value="alta" <%= chamado.prioridade === 'alta' ? 'selected' : '' %>>Alta</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="status" class="form-label">Status</label>
+              <select id="status" name="status" class="form-control" required>
+                <option value="aberto" <%= chamado.status === 'aberto' ? 'selected' : '' %>>Aberto</option>
+                <option value="em_andamento" <%= chamado.status === 'em_andamento' ? 'selected' : '' %>>Em andamento</option>
+                <option value="aguardando" <%= chamado.status === 'aguardando' ? 'selected' : '' %>>Aguardando</option>
+                <option value="fechado" <%= chamado.status === 'fechado' ? 'selected' : '' %>>Resolvido</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="local" class="form-label">Local</label>
+              <input id="local" name="local" class="form-control" maxlength="120" value="<%= chamado.local || '' %>">
+            </div>
+            <% if (usuario.perfil === 'admin') { %>
+              <div class="form-group">
+                <label for="tecnicoId" class="form-label">Técnico responsável</label>
+                <select id="tecnicoId" name="tecnicoId" class="form-control">
+                  <option value="">Sem responsável</option>
+                  <% tecnicos.forEach(tecnico => { %><option value="<%= tecnico.id %>" <%= chamado.tecnicoId === tecnico.id ? 'selected' : '' %>><%= tecnico.nome %></option><% }) %>
+                </select>
+              </div>
+            <% } %>
+          </div>
+          <p class="text-muted">Ao alterar a prioridade, o prazo é recalculado em dias úteis.</p>
+          <div class="form-actions">
+            <a href="/chamados/<%= chamado.id %>" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Salvar alterações</button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+  <script>
+    function atualizarDepartamento() {
+      const categoria = document.getElementById('categoriaId');
+      const departamento = categoria.options[categoria.selectedIndex].getAttribute('data-departamento');
+      document.getElementById('departamentoCategoria').textContent = departamento || 'Selecione uma categoria.';
+    }
+  </script>
+</body>
+</html>

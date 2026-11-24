@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chamado #<%= chamado.id %> - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <%- include('partials/sidebar', { paginaAtiva: 'chamados' }) %>
+    <div class="main-wrapper">
+      <%- include('partials/topbar') %>
+      <main class="content-area">
+        <div class="breadcrumb"><a href="/chamados">Meus Chamados</a><span>›</span><strong>#<%= String(chamado.id).padStart(3, '0') %></strong></div>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Chamado #<%= String(chamado.id).padStart(3, '0') %></h1>
+            <p class="page-subtitle">Aberto em <%= new Date(chamado.createdAt).toLocaleString('pt-BR') %> por <strong><%= chamado.solicitante ? chamado.solicitante.nome : '—' %></strong></p>
+          </div>
+          <div class="form-actions no-print">
+            <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimir / PDF</button>
+            <% if (podeEditar) { %><a href="/chamados/editar/<%= chamado.id %>" class="btn btn-primary">Editar</a><% } %>
+          </div>
+        </div>
+
+        <div class="ticket-detail-grid">
+          <section>
+            <div class="card">
+              <h2 class="card-title">Informações do chamado</h2>
+              <div class="detail-grid">
+                <div><span class="detail-label">Título</span><strong><%= chamado.titulo %></strong></div>
+                <div><span class="detail-label">Departamento</span><strong><%= chamado.departamento ? chamado.departamento.nome : '—' %></strong></div>
+                <div><span class="detail-label">Categoria</span><strong><%= chamado.categoria ? chamado.categoria.nome : '—' %></strong></div>
+                <div><span class="detail-label">Técnico responsável</span><strong><%= chamado.tecnico ? chamado.tecnico.nome : 'Ainda não atribuído' %></strong></div>
+                <div><span class="detail-label">Prioridade</span><span class="badge <%= chamado.prioridade === 'alta' ? 'badge-danger' : chamado.prioridade === 'media' ? 'badge-warning' : 'badge-success' %>"><%= chamado.prioridade %></span></div>
+                <div><span class="detail-label">Prazo estimado</span><strong class="<%= chamado.prazo && new Date(chamado.prazo) < new Date() && !['fechado','cancelado'].includes(chamado.status) ? 'text-danger' : '' %>"><%= chamado.prazo ? new Date(chamado.prazo).toLocaleDateString('pt-BR') : '—' %></strong></div>
+                <% if (chamado.local) { %><div><span class="detail-label">Local</span><strong><%= chamado.local %></strong></div><% } %>
+              </div>
+              <div class="description-block">
+                <span class="detail-label">Descrição</span>
+                <p><%= chamado.descricao %></p>
+              </div>
+              <% if (chamado.etiquetas.length) { %>
+                <div class="tag-list">
+                  <% chamado.etiquetas.forEach(etiqueta => { %><span class="badge badge-info"><%= etiqueta.nome %></span><% }) %>
+                </div>
+              <% } %>
+            </div>
+
+            <div class="card">
+              <h2 class="card-title">Chat do chamado</h2>
+              <div id="chat-history" class="comment-list chat-history" role="log" aria-live="polite" aria-label="Mensagens do chamado" tabindex="0">
+                <% if (comentarios.length) { %>
+                  <% comentarios.forEach(comentario => { %>
+                    <article class="comment-item">
+                      <div class="comment-avatar"><%= comentario.autor ? comentario.autor.nome.charAt(0).toUpperCase() : '?' %></div>
+                      <div class="comment-body">
+                        <div class="comment-meta"><strong><%= comentario.autor ? comentario.autor.nome : 'Usuário' %> (<%= comentario.autor ? comentario.autor.perfil : '' %>)</strong><time><%= new Date(comentario.data_criacao).toLocaleString('pt-BR') %></time></div>
+                        <p><%= comentario.texto %></p>
+                      </div>
+                    </article>
+                  <% }) %>
+                <% } else { %><p class="text-muted">Ainda não há comentários neste chamado.</p><% } %>
+              </div>
+              <form action="/chamados/<%= chamado.id %>/comentarios" method="POST" class="comment-form no-print">
+                <label class="sr-only" for="texto-comentario">Novo comentário</label>
+                <textarea id="texto-comentario" name="texto" class="form-control" rows="2" maxlength="2000" placeholder="Envie uma mensagem ao técnico..." required></textarea>
+                <button type="submit" class="btn btn-primary">Enviar mensagem</button>
+              </form>
+            </div>
+          </section>
+
+          <aside>
+            <div class="card">
+              <h2 class="card-title">Status do chamado</h2>
+              <p><span class="detail-label">Status atual</span><span class="badge badge-info"><%= {aberto:'Em aberto', em_andamento:'Em andamento', aguardando:'Aguardando', fechado:'Resolvido', cancelado:'Cancelado'}[chamado.status] %></span></p>
+              <p class="detail-date"><span class="detail-label">Última atualização</span><%= new Date(chamado.updatedAt).toLocaleString('pt-BR') %></p>
+            </div>
+
+            <% if (podeEditar) { %>
+              <div class="card no-print">
+                <h2 class="card-title">Etiquetas</h2>
+                <form action="/chamados/<%= chamado.id %>/etiquetas" method="POST">
+                  <label for="etiquetas" class="form-label">Separe as etiquetas por vírgula</label>
+                  <input id="etiquetas" name="etiquetas" class="form-control" maxlength="400" value="<%= chamado.etiquetas.map(etiqueta => etiqueta.nome).join(', ') %>" placeholder="Ex.: urgente, rede">
+                  <button type="submit" class="btn btn-secondary" style="margin-top:12px;">Salvar etiquetas</button>
+                </form>
+              </div>
+            <% } %>
+
+            <% if (podeAssumir || podeResolver || (typeof podeReabrir !== 'undefined' && podeReabrir) || podeCancelar || usuario.perfil === 'admin') { %>
+              <div class="card no-print">
+                <h2 class="card-title">Ações</h2>
+                <% if (podeAssumir) { %>
+                  <form action="/chamados/<%= chamado.id %>/assumir" method="POST" class="form-actions">
+                    <button type="submit" class="btn btn-primary">Assumir chamado</button>
+                  </form>
+                <% } %>
+                <% if (podeResolver) { %>
+                  <form action="/chamados/<%= chamado.id %>/resolver" method="POST" class="form-actions" onsubmit="return confirm('Finalizar este chamado?')">
+                    <button type="submit" class="btn btn-primary">Finalizar chamado</button>
+                  </form>
+                  <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" data-open-transfer>Transferir chamado</button>
+                  </div>
+                  <dialog id="transfer-modal" class="transfer-dialog" aria-labelledby="transfer-modal-title">
+                    <div class="transfer-dialog-content">
+                      <div class="transfer-dialog-header">
+                        <h2 id="transfer-modal-title" class="card-title">Transferir chamado</h2>
+                        <button type="button" class="transfer-dialog-close" data-close-transfer aria-label="Fechar">×</button>
+                      </div>
+                      <% if (tecnicosTransferencia.length) { %>
+                        <form action="/chamados/<%= chamado.id %>/transferir" method="POST">
+                          <label class="form-label" for="tecnicoDestino">Técnico do mesmo departamento</label>
+                          <select id="tecnicoDestino" name="tecnicoId" class="form-control" required>
+                            <option value="">Selecione um técnico</option>
+                            <% tecnicosTransferencia.forEach(tecnico => { %><option value="<%= tecnico.id %>"><%= tecnico.nome %></option><% }) %>
+                          </select>
+                          <button type="submit" class="btn btn-primary" style="margin-top:12px;">Confirmar transferência</button>
+                        </form>
+                      <% } else { %>
+                        <p class="text-muted" role="status">Não há outros técnicos neste departamento para transferir o chamado.</p>
+                      <% } %>
+                    </div>
+                  </dialog>
+                <% } %>
+                <% if (typeof podeReabrir !== 'undefined' && podeReabrir) { %>
+                  <form action="/chamados/<%= chamado.id %>/reabrir" method="POST" class="form-actions" onsubmit="return confirm('Reabrir este chamado?')">
+                    <button type="submit" class="btn btn-secondary">Reabrir chamado</button>
+                  </form>
+                <% } %>
+                <% if (podeCancelar) { %>
+                  <form action="/chamados/<%= chamado.id %>/cancelar" method="POST" onsubmit="return confirm('Deseja cancelar este chamado?')">
+                    <button type="submit" class="btn btn-danger-full">Cancelar chamado</button>
+                  </form>
+                <% } %>
+                <% if (usuario.perfil === 'admin') { %>
+                  <form action="/chamados/<%= chamado.id %>/excluir" method="POST" onsubmit="return confirm('Excluir permanentemente este chamado e seus comentários?')">
+                    <button type="submit" class="btn-danger-icon">🗑️ Excluir</button>
+                  </form>
+                <% } %>
+              </div>
+            <% } %>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const historicoChat = document.getElementById('chat-history');
+      if (historicoChat) historicoChat.scrollTop = historicoChat.scrollHeight;
+
+      const dialogoTransferencia = document.getElementById('transfer-modal');
+      const abrirTransferencia = document.querySelector('[data-open-transfer]');
+      if (!dialogoTransferencia || !abrirTransferencia) return;
+      abrirTransferencia.addEventListener('click', function () {
+        dialogoTransferencia.showModal();
+      });
+      dialogoTransferencia.querySelector('[data-close-transfer]').addEventListener('click', function () {
+        dialogoTransferencia.close();
+      });
+      dialogoTransferencia.addEventListener('click', function (evento) {
+        if (evento.target === dialogoTransferencia) dialogoTransferencia.close();
+      });
+    }());
+  </script>
+</body>
+</html>

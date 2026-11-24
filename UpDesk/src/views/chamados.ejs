@@ -3,145 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meus Chamados - UpDesk</title>
+  <title>Chamados - UpDesk</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <div class="app-layout">
     <%- include('partials/sidebar', { paginaAtiva: 'chamados' }) %>
-
     <div class="main-wrapper">
       <%- include('partials/topbar') %>
-
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Meus Chamados</h1>
-            <p class="page-subtitle">Acompanhe, filtre e gerencie todos os chamados da empresa.</p>
+            <h1 class="page-title"><%= usuario.perfil === 'tecnico' ? 'Chamados atribuídos' : (['admin', 'gerencia'].includes(usuario.perfil) ? 'Todos os chamados' : 'Meus chamados') %></h1>
+            <p class="page-subtitle">Acompanhe e localize solicitações de suporte.</p>
           </div>
-          <button type="button" class="btn btn-primary" onclick="document.getElementById('cardNovoChamado').style.display = document.getElementById('cardNovoChamado').style.display === 'none' ? 'block' : 'none'">
-            + Novo Chamado
-          </button>
+          <% if (usuario.perfil !== 'tecnico') { %>
+            <a href="/chamados/novo" class="btn btn-primary">＋ Novo Chamado</a>
+          <% } %>
         </div>
 
-        <!-- Formulário Novo Chamado -->
-        <div id="cardNovoChamado" class="card" style="display: none; border-left: 4px solid #1a73e8;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 class="card-title" style="margin-bottom:0;">Novo Chamado</h2>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('cardNovoChamado').style.display='none'">✕ Fechar</button>
+        <% if (usuario.perfil !== 'cliente') { %>
+        <form action="/chamados" method="GET" class="card filter-panel">
+          <div class="filter-grid">
+            <div class="form-group">
+              <label class="form-label" for="busca">Pesquisar</label>
+              <input id="busca" type="search" name="busca" class="form-control" value="<%= filtros.busca %>" placeholder="Título, descrição ou número">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="status">Status</label>
+              <select id="status" name="status" class="form-control">
+                <option value="">Todos os status</option>
+                <% [['aberto','Em aberto'],['em_andamento','Em andamento'],['aguardando','Aguardando'],['pendente','Pendentes'],['fechado','Resolvido'],['cancelado','Cancelado']].forEach(([valor,rotulo]) => { %>
+                  <option value="<%= valor %>" <%= filtros.status === valor ? 'selected' : '' %>><%= rotulo %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="categoriaId">Categoria</label>
+              <select id="categoriaId" name="categoriaId" class="form-control">
+                <option value="">Todas as categorias</option>
+                <% categorias.forEach(categoria => { %>
+                  <option value="<%= categoria.id %>" <%= filtros.categoriaId === String(categoria.id) ? 'selected' : '' %>><%= categoria.nome %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="departamentoId">Departamento</label>
+              <select id="departamentoId" name="departamentoId" class="form-control">
+                <option value="">Todos os departamentos</option>
+                <% departamentos.forEach(departamento => { %>
+                  <option value="<%= departamento.id %>" <%= filtros.departamentoId === String(departamento.id) ? 'selected' : '' %>><%= departamento.nome %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="dataInicio">Data inicial</label>
+              <input id="dataInicio" type="date" name="dataInicio" class="form-control" value="<%= filtros.dataInicio %>">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="dataFim">Data final</label>
+              <input id="dataFim" type="date" name="dataFim" class="form-control" value="<%= filtros.dataFim %>">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prioridade">Gravidade</label>
+              <select id="prioridade" name="prioridade" class="form-control">
+                <option value="">Todas</option>
+                <% [['baixa','Baixa'],['media','Média'],['alta','Alta']].forEach(([valor,rotulo]) => { %>
+                  <option value="<%= valor %>" <%= filtros.prioridade === valor ? 'selected' : '' %>><%= rotulo %></option>
+                <% }) %>
+              </select>
+            </div>
+            <% if (usuario.perfil === 'admin' && usuarios.length) { %>
+              <div class="form-group">
+                <label class="form-label" for="usuarioId">Usuário solicitante</label>
+                <select id="usuarioId" name="usuarioId" class="form-control">
+                  <option value="">Todos os usuários</option>
+                  <% usuarios.forEach(pessoa => { %><option value="<%= pessoa.id %>" <%= filtros.usuarioId === String(pessoa.id) ? 'selected' : '' %>><%= pessoa.nome %></option><% }) %>
+                </select>
+              </div>
+            <% } %>
           </div>
+          <div class="filter-actions">
+            <a href="/chamados" class="btn btn-secondary">Limpar filtros</a>
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+          </div>
+        </form>
+        <% } %>
 
-          <form action="/chamados/cadastrar" method="POST">
-            <div class="form-group">
-              <label class="form-label">Título <span class="req">*</span></label>
-              <input type="text" name="titulo" class="form-control" placeholder="Descreva o problema de forma resumida" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Descrição <span class="req">*</span></label>
-              <textarea name="descricao" class="form-control" placeholder="Descreva o problema em detalhes..." required></textarea>
-            </div>
-
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label class="form-label">Categoria</label>
-                <select name="categoriaId" class="form-control">
-                  <option value="">Selecione uma categoria</option>
-                  <% if (typeof categorias !== 'undefined') { %>
-                    <% categorias.forEach(cat => { %>
-                      <option value="<%= cat.id %>"><%= cat.nome %></option>
-                    <% }) %>
-                  <% } %>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Departamento</label>
-                <select name="departamentoId" class="form-control">
-                  <option value="">Selecione um departamento</option>
-                  <% if (typeof departamentos !== 'undefined') { %>
-                    <% departamentos.forEach(dep => { %>
-                      <option value="<%= dep.id %>"><%= dep.nome %></option>
-                    <% }) %>
-                  <% } %>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Prioridade</label>
-                <select name="prioridade" class="form-control">
-                  <option value="baixa">Baixa</option>
-                  <option value="media" selected>Média</option>
-                  <option value="alta">Alta</option>
-                </select>
-              </div>
-
-            </div>
-
-            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:16px;">
-              <button type="button" class="btn btn-secondary" onclick="document.getElementById('cardNovoChamado').style.display='none'">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Abrir Chamado</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Tabela de Chamados -->
         <div class="card">
           <div class="table-responsive">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Título</th>
-                  <th>Solicitante</th>
-                  <th>Categoria</th>
-                  <th>Departamento</th>
-                  <th>Status</th>
-                  <th>Prioridade</th>
-                  <th>Ações</th>
+                  <th>#</th><th>Título</th><th>Solicitante</th><th>Categoria</th>
+                  <th>Departamento</th><th>Status</th><th>Prioridade</th><th>Prazo</th><th>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                <% if (typeof chamados !== 'undefined' && chamados.length > 0) { %>
-                  <% chamados.forEach(c => { %>
+                <% if (chamados.length) { %>
+                  <% chamados.forEach(chamado => { %>
+                    <% const rotulos = { aberto: 'Em aberto', em_andamento: 'Em andamento', aguardando: 'Aguardando', fechado: 'Resolvido', cancelado: 'Cancelado' }; %>
+                    <% const atrasado = chamado.prazo && new Date(chamado.prazo) < new Date() && !['fechado','cancelado'].includes(chamado.status); %>
                     <tr>
-                      <td><strong>#<%= String(c.id).padStart(3, '0') %></strong></td>
-                      <td><strong><%= c.titulo %></strong></td>
-                      <td><%= c.solicitante ? c.solicitante.nome : '-' %></td>
-                      <td><%= c.categoria ? c.categoria.nome : '-' %></td>
-                      <td><%= c.departamento ? c.departamento.nome : '-' %></td>
-                      <td>
-                        <% if (c.status === 'aberto') { %>
-                          <span class="badge badge-info">Aberto</span>
-                        <% } else if (c.status === 'em_andamento') { %>
-                          <span class="badge badge-success">Em andamento</span>
-                        <% } else { %>
-                          <span class="badge badge-neutral">Fechado</span>
-                        <% } %>
-                      </td>
-                      <td>
-                        <% if (c.prioridade === 'alta') { %>
-                          <span class="badge badge-danger">Alta</span>
-                        <% } else if (c.prioridade === 'media') { %>
-                          <span class="badge badge-warning">Média</span>
-                        <% } else { %>
-                          <span class="badge badge-success">Baixa</span>
-                        <% } %>
-                      </td>
-                      <td>
-                        <a href="/chamados/editar/<%= c.id %>" class="btn btn-secondary btn-sm">Detalhes</a>
-                      </td>
+                      <td><strong>#<%= String(chamado.id).padStart(3, '0') %></strong></td>
+                      <td><strong><%= chamado.titulo %></strong></td>
+                      <td><%= chamado.solicitante ? chamado.solicitante.nome : '-' %></td>
+                      <td><%= chamado.categoria ? chamado.categoria.nome : '-' %></td>
+                      <td><%= chamado.departamento ? chamado.departamento.nome : '-' %></td>
+                      <td><span class="badge <%= chamado.status === 'fechado' ? 'badge-success' : chamado.status === 'cancelado' ? 'badge-neutral' : chamado.status === 'aguardando' ? 'badge-warning' : 'badge-info' %>"><%= rotulos[chamado.status] %></span></td>
+                      <td><span class="badge <%= chamado.prioridade === 'alta' ? 'badge-danger' : chamado.prioridade === 'media' ? 'badge-warning' : 'badge-success' %>"><%= chamado.prioridade %></span></td>
+                      <td class="<%= atrasado ? 'text-danger' : '' %>"><%= chamado.prazo ? new Date(chamado.prazo).toLocaleDateString('pt-BR') : '-' %><%= atrasado ? ' · Atrasado' : '' %></td>
+                      <td><a href="/chamados/<%= chamado.id %>" class="btn btn-secondary btn-sm">Detalhes</a></td>
                     </tr>
                   <% }) %>
                 <% } else { %>
-                  <tr>
-                    <td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">
-                      Nenhum chamado registado até o momento.
-                    </td>
-                  </tr>
+                  <tr><td colspan="9" class="table-empty">Nenhum chamado encontrado para estes filtros.</td></tr>
                 <% } %>
               </tbody>
             </table>
+          </div>
+          <div class="pagination-bar">
+            <span>Mostrando <%= total === 0 ? 0 : (pagina - 1) * 10 + 1 %>–<%= Math.min(pagina * 10, total) %> de <%= total %> chamados</span>
+            <nav class="pagination" aria-label="Paginação">
+              <% if (pagina > 1) { %>
+                <a class="btn btn-secondary btn-sm" href="/chamados?busca=<%= encodeURIComponent(filtros.busca) %>&status=<%= encodeURIComponent(filtros.status) %>&categoriaId=<%= filtros.categoriaId %>&departamentoId=<%= filtros.departamentoId %>&dataInicio=<%= filtros.dataInicio %>&dataFim=<%= filtros.dataFim %>&prioridade=<%= filtros.prioridade %>&usuarioId=<%= filtros.usuarioId %>&pagina=<%= pagina - 1 %>">‹ Anterior</a>
+              <% } %>
+              <span class="page-indicator"><%= pagina %> / <%= paginas %></span>
+              <% if (pagina < paginas) { %>
+                <a class="btn btn-secondary btn-sm" href="/chamados?busca=<%= encodeURIComponent(filtros.busca) %>&status=<%= encodeURIComponent(filtros.status) %>&categoriaId=<%= filtros.categoriaId %>&departamentoId=<%= filtros.departamentoId %>&dataInicio=<%= filtros.dataInicio %>&dataFim=<%= filtros.dataFim %>&prioridade=<%= filtros.prioridade %>&usuarioId=<%= filtros.usuarioId %>&pagina=<%= pagina + 1 %>">Próxima ›</a>
+              <% } %>
+            </nav>
           </div>
         </div>
       </main>

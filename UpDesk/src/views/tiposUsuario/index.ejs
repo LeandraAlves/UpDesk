@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tipos de usuário - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <%- include('../partials/sidebar', { paginaAtiva: 'tipos-usuario' }) %>
+
+    <div class="main-wrapper">
+      <%- include('../partials/topbar') %>
+
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Tipos de usuário</h1>
+            <p class="page-subtitle">Gerencie os tipos usados para classificar usuários.</p>
+          </div>
+          <% if (['criado', 'editado', 'excluido'].includes(sucesso)) { %>
+            <div class="card" role="status">Tipo de usuário atualizado com sucesso.</div>
+          <% } %>
+        </div>
+
+        <div class="split-grid">
+          <div class="card">
+            <form action="/tipos-usuario" method="GET" class="filter-panel">
+              <label class="form-label" for="busca-tipo">Pesquisar tipos de usuário</label>
+              <div class="form-actions">
+                <input id="busca-tipo" name="busca" class="form-control" type="search" value="<%= busca %>" placeholder="Nome do tipo">
+                <button type="submit" class="btn btn-primary">Pesquisar</button>
+                <a href="/tipos-usuario" class="btn btn-secondary">Limpar</a>
+              </div>
+            </form>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Tipo de usuário</th>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (typeof tiposUsuario !== 'undefined' && tiposUsuario.length > 0) { %>
+                    <% tiposUsuario.forEach(tipoUsuario => { %>
+                      <tr>
+                        <td><%= tipoUsuario.id %></td>
+                        <td>
+                          <form id="tipo-editar-<%= tipoUsuario.id %>" action="/tipos-usuario/editar/<%= tipoUsuario.id %>" method="POST"></form>
+                          <input type="text" name="nome" form="tipo-editar-<%= tipoUsuario.id %>" class="form-control" value="<%= tipoUsuario.nome %>" maxlength="255" aria-label="Nome do tipo de usuário" required>
+                        </td>
+                        <td>
+                          <input type="text" name="descricao" form="tipo-editar-<%= tipoUsuario.id %>" class="form-control" value="<%= tipoUsuario.descricao || '' %>" maxlength="255" aria-label="Descrição do tipo de usuário">
+                        </td>
+                        <td><span class="badge badge-success">Ativa</span></td>
+                        <td>
+                          <div style="display:flex; gap:8px; align-items:center;">
+                            <button type="submit" form="tipo-editar-<%= tipoUsuario.id %>" class="btn btn-secondary btn-sm">Salvar</button>
+                            <form action="/tipos-usuario/excluir/<%= tipoUsuario.id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este tipo de usuário?')">
+                              <button type="submit" class="btn-danger-icon">🗑️ Excluir</button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="5" style="text-align:center; padding:32px; color:#64748b;">Nenhum tipo de usuário cadastrado.</td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" style="border-top: 4px solid #1a73e8;">
+            <h2 class="card-title">Novo tipo de usuário</h2>
+            <form action="/tipos-usuario/cadastrar" method="POST">
+              <div class="form-group">
+                <label class="form-label">Nome do tipo <span class="req">*</span></label>
+                <input type="text" name="nome" class="form-control" placeholder="Digite o nome do tipo" maxlength="255" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <textarea name="descricao" class="form-control" placeholder="Descreva o tipo de usuário..." maxlength="255"></textarea>
+              </div>
+
+              <div style="display:flex; gap:12px; margin-top:24px;">
+                <button type="reset" class="btn btn-secondary" style="flex:1;">Limpar</button>
+                <button type="submit" class="btn btn-primary" style="flex:1;">💾 Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

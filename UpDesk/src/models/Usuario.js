@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/banco');
-const Categoria = require('./Categoria');
+const TipoUsuario = require('./TipoUsuario');
 const Departamento = require('./Departamento');
 
 const Usuario = sequelize.define('Usuario', {
@@ -11,16 +11,17 @@ const Usuario = sequelize.define('Usuario', {
   perfil: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 'tecnico',
+    defaultValue: 'cliente',
     validate: {
       isIn: [['admin', 'tecnico', 'cliente']]
     }
   },
-  categoriaId: { 
+  tipoUsuarioId: {
     type: DataTypes.INTEGER, 
     allowNull: true,
+    field: 'categoriaId',
     references: {
-      model: Categoria,
+      model: TipoUsuario,
       key: 'id'
     }
   },

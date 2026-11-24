@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const categoriaController = require('../controllers/categoriaController');
-const { administrador } = require('../middlewares/autenticacao');
+const categoriaController = require('../controllers/categoriaChamadoController');
+const { somenteAdministrador } = require('../middlewares/autenticacao');
 
-router.use(administrador);
+router.use(somenteAdministrador);
 router.get('/', categoriaController.listar);
 router.post('/cadastrar', categoriaController.cadastrar);
 router.post('/editar/:id', categoriaController.editar);

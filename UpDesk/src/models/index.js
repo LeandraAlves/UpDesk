@@ -1,13 +1,15 @@
 const Usuario = require('./Usuario');
-const Categoria = require('./Categoria');
+const TipoUsuario = require('./TipoUsuario');
+const CategoriaChamado = require('./CategoriaChamado');
 const Departamento = require('./Departamento');
 const Chamado = require('./Chamado');
 const Comentario = require('./Comentario');
+const MensagemEquipe = require('./MensagemEquipe');
 const Etiqueta = require('./Etiqueta');
 const ChamadoEtiqueta = require('./ChamadoEtiqueta');
 
-Usuario.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
-Categoria.hasMany(Usuario, { foreignKey: 'categoriaId', as: 'usuarios' });
+Usuario.belongsTo(TipoUsuario, { foreignKey: 'tipoUsuarioId', as: 'tipoUsuario' });
+TipoUsuario.hasMany(Usuario, { foreignKey: 'tipoUsuarioId', as: 'usuarios' });
 Usuario.belongsTo(Departamento, { foreignKey: 'departamentoId', as: 'departamento' });
 Departamento.hasMany(Usuario, { foreignKey: 'departamentoId', as: 'usuarios' });
 
@@ -16,8 +18,10 @@ Usuario.hasMany(Chamado, { foreignKey: 'usuarioId', as: 'chamados' });
 Chamado.belongsTo(Usuario, { foreignKey: 'tecnicoId', as: 'tecnico' });
 Usuario.hasMany(Chamado, { foreignKey: 'tecnicoId', as: 'chamadosAtribuidos' });
 
-Chamado.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
-Categoria.hasMany(Chamado, { foreignKey: 'categoriaId', as: 'chamados' });
+CategoriaChamado.belongsTo(Departamento, { foreignKey: 'departamentoId', as: 'departamento' });
+Departamento.hasMany(CategoriaChamado, { foreignKey: 'departamentoId', as: 'categoriasChamado' });
+Chamado.belongsTo(CategoriaChamado, { foreignKey: 'categoriaChamadoId', as: 'categoria' });
+CategoriaChamado.hasMany(Chamado, { foreignKey: 'categoriaChamadoId', as: 'chamados' });
 Chamado.belongsTo(Departamento, { foreignKey: 'departamentoId', as: 'departamento' });
 Departamento.hasMany(Chamado, { foreignKey: 'departamentoId', as: 'chamados' });
 
@@ -25,6 +29,11 @@ Comentario.belongsTo(Chamado, { foreignKey: 'chamadoId', as: 'chamado' });
 Chamado.hasMany(Comentario, { foreignKey: 'chamadoId', as: 'comentarios' });
 Comentario.belongsTo(Usuario, { foreignKey: 'usuarioId', as: 'autor' });
 Usuario.hasMany(Comentario, { foreignKey: 'usuarioId', as: 'comentarios' });
+
+MensagemEquipe.belongsTo(Usuario, { foreignKey: 'remetenteId', as: 'remetente' });
+MensagemEquipe.belongsTo(Usuario, { foreignKey: 'destinatarioId', as: 'destinatario' });
+Usuario.hasMany(MensagemEquipe, { foreignKey: 'remetenteId', as: 'mensagensEnviadas' });
+Usuario.hasMany(MensagemEquipe, { foreignKey: 'destinatarioId', as: 'mensagensRecebidas' });
 
 Chamado.belongsToMany(Etiqueta, {
   through: ChamadoEtiqueta,
@@ -41,10 +50,12 @@ Etiqueta.belongsToMany(Chamado, {
 
 module.exports = {
   Usuario,
-  Categoria,
+  TipoUsuario,
+  CategoriaChamado,
   Departamento,
   Chamado,
   Comentario,
+  MensagemEquipe,
   Etiqueta,
   ChamadoEtiqueta
 };

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novo chamado - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <%- include('partials/sidebar', { paginaAtiva: 'novo-chamado' }) %>
+    <div class="main-wrapper">
+      <%- include('partials/topbar') %>
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Novo Chamado</h1>
+            <p class="page-subtitle">Preencha as informações para registrar sua solicitação de suporte.</p>
+          </div>
+        </div>
+
+        <% if (erro) { %><div class="alert-error"><%= erro %></div><% } %>
+
+        <div class="ticket-create-grid">
+          <form action="/chamados/cadastrar" method="POST" class="card">
+            <div class="form-group">
+              <label class="form-label" for="titulo">Título <span class="req">*</span></label>
+              <input id="titulo" type="text" name="titulo" class="form-control" maxlength="150" placeholder="Descreva o problema de forma resumida" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="descricao">Descrição <span class="req">*</span></label>
+              <textarea id="descricao" name="descricao" class="form-control" maxlength="5000" rows="7" placeholder="Informe o que está acontecendo, quando começou e mensagens de erro..." required></textarea>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="departamentoId">Departamento <span class="req">*</span></label>
+                <select id="departamentoId" name="departamentoId" class="form-control" required onchange="atualizarCategorias()">
+                  <option value="">Selecione um departamento</option>
+                  <% departamentos.forEach(departamento => { %><option value="<%= departamento.id %>"><%= departamento.nome %></option><% }) %>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="categoriaId">Categoria do problema <span class="req">*</span></label>
+                <select id="categoriaId" name="categoriaChamadoId" class="form-control" required disabled>
+                  <option value="">Selecione primeiro um departamento</option>
+                  <% categorias.forEach(categoria => { %><option value="<%= categoria.id %>" data-departamento-id="<%= categoria.departamentoId %>"><%= categoria.nome %></option><% }) %>
+                </select>
+                <small id="avisoCategorias" class="text-muted" aria-live="polite"></small>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="prioridade">Prioridade <span class="req">*</span></label>
+                <select id="prioridade" name="prioridade" class="form-control" required>
+                  <option value="baixa">Baixa</option>
+                  <option value="media" selected>Média</option>
+                  <option value="alta">Alta</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="local">Local (opcional)</label>
+                <input id="local" type="text" name="local" maxlength="120" class="form-control" placeholder="Ex.: sala ou setor">
+              </div>
+            </div>
+            <div class="form-actions">
+              <a href="/chamados" class="btn btn-secondary">Cancelar</a>
+              <button type="submit" class="btn btn-primary">Abrir chamado</button>
+            </div>
+          </form>
+
+          <aside>
+            <div class="card info-card">
+              <h2 class="card-title">Dicas para um bom chamado</h2>
+              <ul class="check-list">
+                <li>Descreva o problema com detalhes.</li>
+                <li>Informe quando começou e se aparece alguma mensagem de erro.</li>
+                <li>Selecione o departamento; as categorias exibidas serão apenas as correspondentes.</li>
+                <li>Acompanhe o atendimento em “Meus Chamados”.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h2 class="card-title">Prazo estimado</h2>
+              <p>O prazo é calculado automaticamente em dias úteis pela prioridade: alta (1 dia), média (3 dias) e baixa (5 dias).</p>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script>
+    function atualizarCategorias() {
+      const departamentoId = document.getElementById('departamentoId').value;
+      const categoriaSelect = document.getElementById('categoriaId');
+      categoriaSelect.value = '';
+      categoriaSelect.disabled = !departamentoId;
+      let totalCategorias = 0;
+      Array.from(categoriaSelect.options).forEach((option, index) => {
+        if (index === 0) {
+          option.textContent = departamentoId ? 'Selecione uma categoria' : 'Selecione primeiro um departamento';
+          return;
+        }
+        const corresponde = option.dataset.departamentoId === departamentoId;
+        if (corresponde) totalCategorias += 1;
+        option.hidden = !corresponde;
+        option.disabled = !corresponde;
+      });
+      document.getElementById('avisoCategorias').textContent =
+        departamentoId && totalCategorias === 0
+          ? 'Não há categorias cadastradas para este departamento.'
+          : '';
+    }
+  </script>
+</body>
+</html>

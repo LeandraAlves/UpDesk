@@ -3,70 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel TI - UpDesk</title>
+  <title>Início técnico - UpDesk</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <div class="app-layout">
-    <%- include('partials/sidebar', { paginaAtiva: 'ti' }) %>
-
+    <%- include('partials/sidebar', { paginaAtiva: 'inicio-ti' }) %>
     <div class="main-wrapper">
       <%- include('partials/topbar') %>
-
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Painel do Setor de TI</h1>
-            <p class="page-subtitle">Chamados em aberto solicitados pelos clientes.</p>
+            <h1 class="page-title">Olá, <%= usuario.nome %></h1>
+            <p class="page-subtitle">Acompanhe seus atendimentos e a fila do seu departamento.</p>
           </div>
-          <a href="/ti/chamados-abertos" class="btn btn-primary">🔄 Atualizar Fila</a>
+          <a href="/ti/chamados-abertos" class="btn btn-primary">Abrir fila de atendimento</a>
         </div>
-
-        <div class="card">
-          <h2 class="card-title">Chamados em Aberto (Clientes)</h2>
+        <div class="kpi-grid">
+          <a class="kpi-card kpi-blue" href="/chamados"><div class="kpi-icon">▤</div><div><div class="kpi-label">Chamados atribuídos</div><div class="kpi-value"><%= total %></div></div></a>
+          <a class="kpi-card kpi-yellow" href="/chamados?status=pendente"><div class="kpi-icon">◷</div><div><div class="kpi-label">Pendentes</div><div class="kpi-value"><%= pendentes %></div></div></a>
+          <a class="kpi-card kpi-green" href="/chamados?status=fechado"><div class="kpi-icon">✓</div><div><div class="kpi-label">Resolvidos</div><div class="kpi-value"><%= resolvidos %></div></div></a>
+        </div>
+        <section class="card">
+          <div class="section-heading">
+            <h2 class="card-title">Atualizações recentes</h2>
+            <a href="/chamados">Ver chamados atribuídos</a>
+          </div>
           <div class="table-responsive">
             <table class="data-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Título</th>
-                  <th>Cliente (Solicitante)</th>
-                  <th>Prioridade</th>
-                  <th>Status</th>
-                  <th>Data</th>
-                </tr>
-              </thead>
+              <thead><tr><th>#</th><th>Título</th><th>Solicitante</th><th>Categoria</th><th>Departamento</th><th>Status</th><th></th></tr></thead>
               <tbody>
-                <% if (typeof chamadosAbertos !== 'undefined' && chamadosAbertos.length > 0) { %>
-                  <% chamadosAbertos.forEach(c => { %>
+                <% if (chamadosRecentes.length) { %>
+                  <% chamadosRecentes.forEach(chamado => { %>
                     <tr>
-                      <td><strong>#<%= String(c.id).padStart(3, '0') %></strong></td>
-                      <td><strong><%= c.titulo %></strong></td>
-                      <td><%= c.solicitante ? c.solicitante.nome : 'Desconhecido' %></td>
-                      <td>
-                        <% if (c.prioridade === 'alta') { %>
-                          <span class="badge badge-danger">Alta</span>
-                        <% } else if (c.prioridade === 'media') { %>
-                          <span class="badge badge-warning">Média</span>
-                        <% } else { %>
-                          <span class="badge badge-success">Baixa</span>
-                        <% } %>
-                      </td>
-                      <td><span class="badge badge-info"><%= c.status %></span></td>
-                      <td><%= c.createdAt ? c.createdAt.toLocaleDateString('pt-BR') : '-' %></td>
+                      <td>#<%= String(chamado.id).padStart(3, '0') %></td>
+                      <td><%= chamado.titulo %></td>
+                      <td><%= chamado.solicitante ? chamado.solicitante.nome : '—' %></td>
+                      <td><%= chamado.categoria ? chamado.categoria.nome : '—' %></td>
+                      <td><%= chamado.departamento ? chamado.departamento.nome : '—' %></td>
+                      <td><%= {aberto:'Em aberto', em_andamento:'Em andamento', aguardando:'Aguardando', fechado:'Resolvido', cancelado:'Cancelado'}[chamado.status] %></td>
+                      <td><a href="/chamados/<%= chamado.id %>" class="btn btn-secondary btn-sm">Detalhes</a></td>
                     </tr>
                   <% }) %>
-                <% } else { %>
-                  <tr>
-                    <td colspan="6" style="text-align: center; padding: 36px; color: #64748b;">
-                      Nenhum chamado em aberto no momento.
-                    </td>
-                  </tr>
-                <% } %>
+                <% } else { %><tr><td colspan="7" class="table-empty">Nenhum chamado atribuído ainda.</td></tr><% } %>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   </div>

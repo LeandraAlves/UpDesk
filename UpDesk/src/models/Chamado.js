@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/banco');
 const Usuario = require('./Usuario');
-const Categoria = require('./Categoria');
+const CategoriaChamado = require('./CategoriaChamado');
 const Departamento = require('./Departamento');
 
 const Chamado = sequelize.define('Chamado', {
@@ -13,7 +13,7 @@ const Chamado = sequelize.define('Chamado', {
     defaultValue: 'media' 
   },
   status: { 
-    type: DataTypes.ENUM('aberto', 'em_andamento', 'fechado'), 
+    type: DataTypes.ENUM('aberto', 'em_andamento', 'aguardando', 'fechado', 'cancelado'),
     defaultValue: 'aberto' 
   },
   usuarioId: {
@@ -21,10 +21,10 @@ const Chamado = sequelize.define('Chamado', {
     allowNull: false,
     references: { model: Usuario, key: 'id' }
   },
-  categoriaId: {
+  categoriaChamadoId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    references: { model: Categoria, key: 'id' }
+    references: { model: CategoriaChamado, key: 'id' }
   },
   departamentoId: {
     type: DataTypes.INTEGER,
@@ -38,6 +38,10 @@ const Chamado = sequelize.define('Chamado', {
   },
   prazo: {
     type: DataTypes.DATE,
+    allowNull: true
+  },
+  local: {
+    type: DataTypes.STRING,
     allowNull: true
   }
 }, {

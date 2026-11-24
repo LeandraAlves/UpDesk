@@ -20,10 +20,19 @@
             <p class="page-subtitle">Cadastre e gerencie os acessos da equipe e clientes.</p>
           </div>
         </div>
+        <% if (sucesso === 'excluido') { %><div class="card" role="status">Usuário excluído com sucesso.</div><% } %>
+        <% if (sucesso === 'criado') { %><div class="card" role="status">Usuário cadastrado com sucesso.</div><% } %>
 
         <div class="split-grid">
-          <!-- Tabela de Usuários (Esquerda) -->
           <div class="card">
+            <form action="/usuarios" method="GET" class="filter-panel">
+              <label class="form-label" for="busca-usuario">Pesquisar usuários</label>
+              <div class="form-actions">
+                <input id="busca-usuario" name="busca" class="form-control" type="search" value="<%= busca %>" placeholder="Nome ou e-mail">
+                <button type="submit" class="btn btn-primary">Pesquisar</button>
+                <a href="/usuarios" class="btn btn-secondary">Limpar</a>
+              </div>
+            </form>
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
@@ -32,7 +41,8 @@
                     <th>Nome</th>
                     <th>E-mail</th>
                     <th>Perfil</th>
-                    <th>Categoria</th>
+                    <th>Tipo de usuário</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -53,12 +63,19 @@
                             <span class="badge badge-neutral"><%= u.perfil %></span>
                           <% } %>
                         </td>
-                        <td><%= u.categoria ? u.categoria.nome : 'Sem categoria' %></td>
+                        <td><%= u.tipoUsuario ? u.tipoUsuario.nome : 'Sem tipo definido' %></td>
+                        <td>
+                          <% if (u.id !== usuario.id) { %>
+                            <form action="/usuarios/excluir/<%= u.id %>" method="POST" onsubmit="return confirm('Excluir este usuário?')">
+                              <button type="submit" class="btn-danger-icon">🗑️ Excluir</button>
+                            </form>
+                          <% } else { %><span class="text-muted">Conta atual</span><% } %>
+                        </td>
                       </tr>
                     <% }) %>
                   <% } else { %>
                     <tr>
-                      <td colspan="5" style="text-align:center; padding:32px; color:#64748b;">Nenhum usuário cadastrado.</td>
+                      <td colspan="6" style="text-align:center; padding:32px; color:#64748b;">Nenhum usuário encontrado.</td>
                     </tr>
                   <% } %>
                 </tbody>
@@ -66,28 +83,27 @@
             </div>
           </div>
 
-          <!-- Painel Lateral Novo Usuário (Direita) -->
           <div class="card" style="border-top: 4px solid #1a73e8;">
             <h2 class="card-title">Novo Usuário</h2>
             <form action="/usuarios/cadastrar" method="POST">
               <div class="form-group">
                 <label class="form-label">Nome do Usuário <span class="req">*</span></label>
-                <input type="text" name="nome" class="form-control" placeholder="Nome completo" required>
+                <input type="text" name="nome" class="form-control" maxlength="255" placeholder="Nome completo" required>
               </div>
 
               <div class="form-group">
                 <label class="form-label">E-mail <span class="req">*</span></label>
-                <input type="email" name="email" class="form-control" placeholder="email@empresa.com" required>
+                <input type="email" name="email" class="form-control" maxlength="255" placeholder="email@empresa.com" required>
               </div>
 
               <div class="form-group">
                 <label class="form-label">Senha <span class="req">*</span></label>
-                <input type="password" name="senha" class="form-control" placeholder="Senha de acesso" required>
+                <input type="password" name="senha" class="form-control" minlength="8" placeholder="Senha de acesso" required>
               </div>
 
               <div class="form-group">
                 <label class="form-label">Perfil <span class="req">*</span></label>
-                <select name="perfil" class="form-control" required>
+                <select name="perfil" id="perfilSelect" class="form-control" required onchange="verificarTipoUsuario()">
                   <option value="">Selecione o Perfil...</option>
                   <option value="tecnico">Técnico</option>
                   <option value="admin">Admin</option>
@@ -96,12 +112,12 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">Categoria <span class="req">*</span></label>
-                <select name="categoriaId" id="categoriaSelect" class="form-control" required onchange="verificarCategoria(this)">
-                  <option value="">Selecione a Categoria...</option>
-                  <% if (typeof categorias !== 'undefined') { %>
-                    <% categorias.forEach(cat => { %>
-                      <option value="<%= cat.id %>" data-nome="<%= cat.nome.trim().toLowerCase() %>"><%= cat.nome %></option>
+                <label class="form-label">Tipo de usuário <span class="req">*</span></label>
+                <select name="tipoUsuarioId" id="tipoUsuarioSelect" class="form-control" required onchange="verificarTipoUsuario()">
+                  <option value="">Selecione o tipo de usuário...</option>
+                  <% if (typeof tiposUsuario !== 'undefined') { %>
+                    <% tiposUsuario.forEach(tipoUsuario => { %>
+                      <option value="<%= tipoUsuario.id %>" data-nome="<%= tipoUsuario.nome.trim().toLowerCase() %>"><%= tipoUsuario.nome %></option>
                     <% }) %>
                   <% } %>
                 </select>
@@ -109,7 +125,7 @@
 
               <div class="form-group" id="campoDepartamento" style="display: none;">
                 <label class="form-label">Departamento</label>
-                <select name="departamentoId" class="form-control">
+                <select name="departamentoId" id="departamentoSelect" class="form-control" disabled>
                   <option value="">Selecione o Departamento...</option>
                   <% if (typeof departamentos !== 'undefined') { %>
                     <% departamentos.forEach(dep => { %>
@@ -128,15 +144,20 @@
   </div>
 
   <script>
-    function verificarCategoria(select) {
-      const selectedOption = select.options[select.selectedIndex];
-      const nomeCategoria = selectedOption.getAttribute('data-nome');
+    function verificarTipoUsuario() {
+      const tipoUsuarioSelect = document.getElementById('tipoUsuarioSelect');
+      const selectedOption = tipoUsuarioSelect.options[tipoUsuarioSelect.selectedIndex];
+      const nomeTipoUsuario = (selectedOption.getAttribute('data-nome') || '').trim().toLowerCase();
+      const perfil = document.getElementById('perfilSelect').value;
       const campoDep = document.getElementById('campoDepartamento');
+      const departamentoSelect = document.getElementById('departamentoSelect');
+      const semDepartamento = perfil === 'cliente' ||
+        (perfil !== 'tecnico' && ['cliente', 'gerencia'].includes(nomeTipoUsuario));
 
-      if (nomeCategoria && nomeCategoria !== 'gerencia') {
-        campoDep.style.display = 'block';
-      } else {
-        campoDep.style.display = 'none';
+      campoDep.style.display = semDepartamento ? 'none' : 'block';
+      departamentoSelect.disabled = semDepartamento;
+      if (semDepartamento) {
+        departamentoSelect.value = '';
       }
     }
   </script>

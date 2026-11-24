@@ -19,6 +19,9 @@ module.exports = {
     if (!nome || !email || !senha || !confirmaSenha) {
       return res.status(400).render('cadastro', { erro: 'Preencha todos os campos.' });
     }
+    if (nome.length > 255 || email.length > 255) {
+      return res.status(400).render('cadastro', { erro: 'Nome ou e-mail excedem o limite permitido.' });
+    }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).render('cadastro', { erro: 'Informe um e-mail válido.' });
@@ -30,6 +33,9 @@ module.exports = {
 
     if (senha.length < 8) {
       return res.status(400).render('cadastro', { erro: 'A senha deve ter pelo menos 8 caracteres.' });
+    }
+    if (Buffer.byteLength(senha, 'utf8') > 72) {
+      return res.status(400).render('cadastro', { erro: 'A senha deve ter no máximo 72 bytes.' });
     }
 
     try {
@@ -67,13 +73,14 @@ module.exports = {
           id: usuario.id,
           nome: usuario.nome,
           email: usuario.email,
-          perfil: usuario.perfil
+          perfil: usuario.perfil,
+          departamentoId: usuario.departamentoId
         };
 
         if (usuario.perfil === 'cliente') {
           return res.redirect('/chamados');
         }
-        return res.redirect(usuario.perfil === 'tecnico' ? '/ti/chamados-abertos' : '/inicio');
+        return res.redirect(usuario.perfil === 'tecnico' ? '/ti' : '/inicio');
       });
     } catch (erro) {
       console.error('Erro crítico no login:', erro);

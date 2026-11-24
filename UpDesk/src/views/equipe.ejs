@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipe - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <%- include('partials/sidebar', { paginaAtiva: 'equipe' }) %>
+    <div class="main-wrapper">
+      <%- include('partials/topbar') %>
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Equipe</h1>
+            <p class="page-subtitle">Converse em particular com os técnicos do seu departamento.</p>
+          </div>
+        </div>
+
+        <div class="team-chat-layout">
+          <section class="card team-members">
+            <h2 class="card-title">Técnicos da equipe</h2>
+            <% if (tecnicos.length) { %>
+              <nav class="team-member-list" aria-label="Técnicos da equipe">
+                <% tecnicos.forEach(tecnico => { %>
+                  <a class="team-member <%= tecnicoSelecionado && tecnicoSelecionado.id === tecnico.id ? 'active' : '' %>" href="/ti/equipe?tecnicoId=<%= tecnico.id %>">
+                    <span class="team-member-avatar"><%= tecnico.nome.charAt(0).toUpperCase() %></span>
+                    <span><%= tecnico.nome %></span>
+                  </a>
+                <% }) %>
+              </nav>
+            <% } else { %>
+              <p class="text-muted">Não há outros técnicos no seu departamento.</p>
+            <% } %>
+          </section>
+
+          <section class="card team-conversation" <% if (tecnicoSelecionado) { %>data-equipe-chat data-tecnico-id="<%= tecnicoSelecionado.id %>" data-usuario-id="<%= usuario.id %>" data-mensagens-url="/ti/equipe/<%= tecnicoSelecionado.id %>/mensagens"<% } %>>
+            <% if (tecnicoSelecionado) { %>
+              <h2 class="card-title">Conversa com <%= tecnicoSelecionado.nome %></h2>
+              <div id="team-chat-history" class="comment-list chat-history" role="log" aria-live="polite" aria-label="Mensagens da equipe" tabindex="0"></div>
+              <p class="team-chat-error" data-chat-error role="alert" hidden></p>
+              <form action="/ti/equipe/<%= tecnicoSelecionado.id %>/mensagens" method="POST" class="comment-form team-chat-form">
+                <label class="sr-only" for="mensagem-equipe">Mensagem para <%= tecnicoSelecionado.nome %></label>
+                <textarea id="mensagem-equipe" name="texto" class="form-control" rows="2" maxlength="2000" placeholder="Escreva uma mensagem..." required></textarea>
+                <button type="submit" class="btn btn-primary">Enviar</button>
+              </form>
+            <% } else { %>
+              <div class="team-chat-empty">
+                <h2 class="card-title">Chat da equipe</h2>
+                <p class="text-muted">Selecione um técnico para iniciar uma conversa.</p>
+              </div>
+            <% } %>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="/js/equipe-chat.js" defer></script>
+</body>
+</html>

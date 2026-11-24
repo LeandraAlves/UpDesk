@@ -10,24 +10,46 @@
 
     <% if (perfilUser === 'admin' || perfilUser === 'gerencia') { %>
       <a href="/inicio" class="nav-item <%= rotaAtiva === 'inicio' ? 'active' : '' %>">
-        <span>🏠</span> Dashboard
+        <span>🏠</span> Início
+      </a>
+    <% } %>
+    <% if (perfilUser === 'tecnico') { %>
+      <a href="/ti" class="nav-item <%= rotaAtiva === 'inicio-ti' ? 'active' : '' %>">
+        <span>🏠</span> Início
       </a>
     <% } %>
 
     <a href="/chamados" class="nav-item <%= rotaAtiva === 'chamados' ? 'active' : '' %>">
-      <span>📋</span> <%= perfilUser === 'tecnico' ? 'Chamados atribuídos' : 'Meus Chamados' %>
+      <span>📋</span> <%= perfilUser === 'tecnico' ? 'Chamados atribuídos' : (['admin', 'gerencia'].includes(perfilUser) ? 'Todos os chamados' : 'Meus Chamados') %>
     </a>
+    <% if (perfilUser !== 'tecnico') { %>
+      <a href="/chamados/novo" class="nav-item <%= rotaAtiva === 'novo-chamado' ? 'active' : '' %>">
+        <span>＋</span> Novo Chamado
+      </a>
+    <% } %>
 
     <% if (perfilUser === 'admin' || perfilUser === 'tecnico') { %>
       <a href="/ti/chamados-abertos" class="nav-item <%= rotaAtiva === 'ti' ? 'active' : '' %>">
         <span>📊</span> Fila de atendimento
       </a>
     <% } %>
-
-    <% if (perfilUser === 'admin' || perfilUser === 'gerencia') { %>
-      <a href="/categorias" class="nav-item <%= rotaAtiva === 'categorias' ? 'active' : '' %>">
-        <span>🗂️</span> Categorias
+    <% if (perfilUser === 'tecnico') { %>
+      <a href="/ti/equipe" class="nav-item <%= rotaAtiva === 'equipe' ? 'active' : '' %>">
+        <span>👥</span> Equipe
       </a>
+    <% } %>
+    <% if (perfilUser === 'admin') { %>
+      <a href="/ti/desempenho" class="nav-item <%= rotaAtiva === 'desempenho' ? 'active' : '' %>">
+        <span>📈</span> Desempenho
+      </a>
+      <a href="/tipos-usuario" class="nav-item <%= rotaAtiva === 'tipos-usuario' ? 'active' : '' %>">
+        <span>🗂️</span> Tipos de usuário
+      </a>
+      <a href="/categorias" class="nav-item <%= rotaAtiva === 'categorias-chamado' ? 'active' : '' %>">
+        <span>🗂️</span> Categorias de chamados
+      </a>
+    <% } %>
+    <% if (perfilUser === 'admin' || perfilUser === 'gerencia') { %>
       <a href="/departamentos" class="nav-item <%= rotaAtiva === 'departamentos' ? 'active' : '' %>">
         <span>🏢</span> Departamentos
       </a>
@@ -45,3 +67,4 @@
     </form>
   </div>
 </aside>
+<script src="/js/instant-forms.js" defer></script>

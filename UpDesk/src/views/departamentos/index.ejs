@@ -20,7 +20,16 @@
             <p class="page-subtitle">Gerencie os departamentos da empresa para organização dos chamados.</p>
           </div>
         </div>
-
+        <% if (erro) { %>
+          <div class="card" role="alert" style="border-left:4px solid #dc2626; color:#b91c1c; margin-bottom:16px;">
+            <%= erro %>
+          </div>
+        <% } %>
+        <% if (sucesso === 'criado' || sucesso === 'editado' || sucesso === 'excluido') { %>
+          <div class="card" role="status" style="border-left:4px solid #16a34a; color:#15803d; margin-bottom:16px;">
+            <%= sucesso === 'criado' ? 'Departamento criado com sucesso.' : (sucesso === 'editado' ? 'Departamento atualizado com sucesso.' : 'Departamento excluído com sucesso.') %>
+          </div>
+        <% } %>
         <div class="split-grid">
           <!-- Lista de Departamentos (Esquerda) -->
           <div class="card">
@@ -32,6 +41,7 @@
                     <th>Nome do Departamento</th>
                     <th>Descrição</th>
                     <th>Status</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -39,14 +49,28 @@
                     <% departamentos.forEach(dep => { %>
                       <tr>
                         <td><%= dep.id %></td>
-                        <td><strong><%= dep.nome %></strong></td>
-                        <td style="color:#64748b;"><%= dep.descricao || 'Sem descrição' %></td>
+                        <td>
+                          <form id="departamento-editar-<%= dep.id %>" action="/departamentos/editar/<%= dep.id %>" method="POST">
+                            <input type="text" name="nome" class="form-control" value="<%= dep.nome %>" maxlength="255" aria-label="Nome do departamento" required>
+                          </form>
+                        </td>
+                        <td>
+                          <input type="text" name="descricao" form="departamento-editar-<%= dep.id %>" class="form-control" value="<%= dep.descricao || '' %>" maxlength="255" aria-label="Descrição do departamento">
+                        </td>
                         <td><span class="badge badge-success">Ativo</span></td>
+                        <td>
+                          <div style="display:flex; gap:8px; align-items:center;">
+                            <button type="submit" form="departamento-editar-<%= dep.id %>" class="btn btn-secondary btn-sm">Salvar</button>
+                            <form action="/departamentos/excluir/<%= dep.id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este departamento?')">
+                              <button type="submit" class="btn-danger-icon">🗑️ Excluir</button>
+                            </form>
+                          </div>
+                        </td>
                       </tr>
                     <% }) %>
                   <% } else { %>
                     <tr>
-                      <td colspan="4" style="text-align:center; padding:32px; color:#64748b;">Nenhum departamento cadastrado.</td>
+                      <td colspan="5" style="text-align:center; padding:32px; color:#64748b;">Nenhum departamento cadastrado.</td>
                     </tr>
                   <% } %>
                 </tbody>
@@ -60,12 +84,11 @@
             <form action="/departamentos/novo" method="POST">
               <div class="form-group">
                 <label class="form-label">Nome do Departamento <span class="req">*</span></label>
-                <input type="text" name="nome" class="form-control" placeholder="Digite o nome do departamento" required>
+                <input type="text" name="nome" class="form-control" placeholder="Digite o nome do departamento" maxlength="255" value="<%= formulario.nome %>" required>
               </div>
-
               <div class="form-group">
                 <label class="form-label">Descrição</label>
-                <textarea name="descricao" class="form-control" placeholder="Descreva o departamento..."></textarea>
+                <textarea name="descricao" class="form-control" maxlength="255" placeholder="Descreva o departamento..."><%= formulario.descricao %></textarea>
               </div>
 
               <div style="display:flex; gap:12px; margin-top:24px;">

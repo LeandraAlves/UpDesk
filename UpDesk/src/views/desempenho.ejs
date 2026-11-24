@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desempenho - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <%- include('partials/sidebar', { paginaAtiva: 'desempenho' }) %>
+    <div class="main-wrapper">
+      <%- include('partials/topbar') %>
+      <main class="content-area">
+        <div class="page-header">
+          <div><h1 class="page-title">Desempenho da equipe</h1><p class="page-subtitle">Resumo dos chamados pendentes e resolvidos.</p></div>
+        </div>
+        <form action="/ti/desempenho" method="GET" class="card filter-panel">
+          <div class="form-group">
+            <label for="tecnicoId" class="form-label">Técnico</label>
+            <select id="tecnicoId" name="tecnicoId" class="form-control">
+              <option value="">Todos os técnicos</option>
+              <% tecnicos.forEach(tecnico => { %><option value="<%= tecnico.id %>" <%= tecnicoId === String(tecnico.id) ? 'selected' : '' %>><%= tecnico.nome %></option><% }) %>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Filtrar</button>
+        </form>
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-yellow"><div class="kpi-icon">◷</div><div><div class="kpi-label">Pendentes</div><div class="kpi-value"><%= pendentes %></div></div></div>
+          <div class="kpi-card kpi-green"><div class="kpi-icon">✓</div><div><div class="kpi-label">Resolvidos</div><div class="kpi-value"><%= resolvidos %></div></div></div>
+        </div>
+        <section class="card">
+          <h2 class="card-title">Resumo</h2>
+          <div class="bar-chart">
+            <% const maiorTotal = Math.max(1, pendentes, resolvidos); %>
+            <% [['Pendentes', pendentes, 'kpi-yellow'], ['Resolvidos', resolvidos, 'kpi-green']].forEach(([nome, total, classe]) => { %>
+              <div class="bar-chart-item <%= classe %>">
+                <div class="bar-chart-value"><%= total %></div>
+                <div class="bar-chart-track"><span style="height:<%= Math.round(total / maiorTotal * 100) %>%"></span></div>
+                <div class="bar-chart-label"><%= nome %></div>
+              </div>
+            <% }) %>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

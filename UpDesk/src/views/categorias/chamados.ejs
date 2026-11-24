@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categorias de chamados - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <%- include('../partials/sidebar', { paginaAtiva: 'categorias-chamado' }) %>
+    <div class="main-wrapper">
+      <%- include('../partials/topbar') %>
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Categorias de chamados</h1>
+            <p class="page-subtitle">Cada categoria deve pertencer a um departamento.</p>
+          </div>
+        </div>
+        <% if (typeof erro !== 'undefined' && erro) { %><div class="alert-error" role="alert"><%= erro %></div><% } %>
+        <% if (['criado', 'editado', 'excluido'].includes(sucesso)) { %>
+          <div class="card" role="status">Categoria de chamado atualizada com sucesso.</div>
+        <% } %>
+        <div class="split-grid">
+          <section class="card">
+            <form action="/categorias" method="GET" class="filter-panel">
+              <label class="form-label" for="busca-categoria">Pesquisar categorias</label>
+              <div class="form-actions">
+                <input id="busca-categoria" type="search" name="busca" class="form-control" value="<%= filtros.busca %>" placeholder="Nome da categoria">
+                <select name="departamentoId" class="form-control" aria-label="Filtrar por departamento">
+                  <option value="">Todos os departamentos</option>
+                  <% departamentos.forEach(departamento => { %><option value="<%= departamento.id %>" <%= filtros.departamentoId === String(departamento.id) ? 'selected' : '' %>><%= departamento.nome %></option><% }) %>
+                </select>
+                <button class="btn btn-primary" type="submit">Pesquisar</button>
+                <a class="btn btn-secondary" href="/categorias">Limpar</a>
+              </div>
+            </form>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead><tr><th>Nome</th><th>Departamento</th><th>Descrição</th><th>Ações</th></tr></thead>
+                <tbody>
+                  <% if (categorias.length) { %>
+                    <% categorias.forEach(categoria => { %>
+                      <tr>
+                        <td>
+                          <form id="categoria-chamado-editar-<%= categoria.id %>" action="/categorias/editar/<%= categoria.id %>" method="POST"></form>
+                          <input form="categoria-chamado-editar-<%= categoria.id %>" name="nome" class="form-control" maxlength="255" value="<%= categoria.nome %>" aria-label="Nome da categoria" required>
+                        </td>
+                        <td>
+                          <select form="categoria-chamado-editar-<%= categoria.id %>" name="departamentoId" class="form-control" aria-label="Departamento" required>
+                            <% departamentos.forEach(departamento => { %>
+                              <option value="<%= departamento.id %>" <%= categoria.departamentoId === departamento.id ? 'selected' : '' %>><%= departamento.nome %></option>
+                            <% }) %>
+                          </select>
+                        </td>
+                        <td><input form="categoria-chamado-editar-<%= categoria.id %>" name="descricao" class="form-control" maxlength="1000" value="<%= categoria.descricao || '' %>" aria-label="Descrição"></td>
+                        <td>
+                          <div class="form-actions">
+                            <button form="categoria-chamado-editar-<%= categoria.id %>" class="btn btn-secondary btn-sm" type="submit">Salvar</button>
+                            <form action="/categorias/excluir/<%= categoria.id %>" method="POST" onsubmit="return confirm('Excluir esta categoria de chamado?')">
+                              <button class="btn-danger-icon" type="submit">🗑️ Excluir</button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %><tr><td colspan="4" class="table-empty">Nenhuma categoria encontrada.</td></tr><% } %>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <section class="card">
+            <h2 class="card-title">Nova categoria</h2>
+            <form action="/categorias/cadastrar" method="POST">
+              <div class="form-group">
+                <label class="form-label" for="nome-categoria">Nome <span class="req">*</span></label>
+                <input id="nome-categoria" name="nome" class="form-control" maxlength="255" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="departamento-categoria">Departamento <span class="req">*</span></label>
+                <select id="departamento-categoria" name="departamentoId" class="form-control" required>
+                  <option value="">Selecione um departamento</option>
+                  <% departamentos.forEach(departamento => { %><option value="<%= departamento.id %>"><%= departamento.nome %></option><% }) %>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="descricao-categoria">Descrição</label>
+                <textarea id="descricao-categoria" name="descricao" class="form-control" maxlength="1000"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Salvar categoria</button>
+            </form>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
