@@ -7,6 +7,9 @@ const { autenticado } = require('./src/middlewares/autenticacao');
 const dashboardController = require('./src/controllers/dashboardController');
 const criarAdministradorInicial = require('./src/config/administradorInicial');
 const migrarCategoriasChamado = require('./src/config/migrarCategoriasChamado');
+const { avisarSeSMTPNaoConfigurado } = require('./src/services/notificacaoEmail');
+
+avisarSeSMTPNaoConfigurado();
 
 const sessionSecret = process.env.SESSION_SECRET ||
   (process.env.NODE_ENV === 'production' ? null : 'updesk-local-development-secret-change-me');
@@ -48,6 +51,7 @@ const departamentoRotas = require('./src/routes/departamentoRotas');
 const usuarioRotas = require('./src/routes/usuarioRotas');
 const chamadoRotas = require('./src/routes/chamadoRotas');
 const tiRotas = require('./src/routes/tiRotas');
+const auditoriaRotas = require('./src/routes/auditoriaRotas');
 
 // --- REGISTO DE ROTAS ---
 app.get('/', (req, res) => {
@@ -74,6 +78,7 @@ app.use('/departamentos', autenticado, departamentoRotas);
 app.use('/usuarios', autenticado, usuarioRotas);
 app.use('/chamados', autenticado, chamadoRotas);
 app.use('/ti', autenticado, tiRotas);
+app.use('/auditoria', auditoriaRotas);
 
 // --- SINCRONIZAÇÃO COM O BANCO E START DO SERVIDOR ---
 const PORT = process.env.PORT || 3000;

@@ -2,7 +2,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const Chamado = require('../src/models/Chamado');
 const Usuario = require('../src/models/Usuario');
+const RegistroAuditoria = require('../src/models/RegistroAuditoria');
+const notificacaoEmail = require('../src/services/notificacaoEmail');
 const chamadoController = require('../src/controllers/chamadoController');
+const notificarChamadoOriginal = notificacaoEmail.notificarChamado;
+notificacaoEmail.notificarChamado = async () => {};
+test.after(() => {
+  notificacaoEmail.notificarChamado = notificarChamadoOriginal;
+});
 
 function criarContexto() {
   const atualizacoes = [];
@@ -43,15 +50,23 @@ function criarContexto() {
 test('transfere chamado com departamento e técnico do destino', async (t) => {
   const originals = {
     findByPk: Chamado.findByPk,
-    usuarioFindOne: Usuario.findOne
+    usuarioFindOne: Usuario.findOne,
+    registroCreate: RegistroAuditoria.create
   };
   t.after(() => {
     Chamado.findByPk = originals.findByPk;
     Usuario.findOne = originals.usuarioFindOne;
+    RegistroAuditoria.create = originals.registroCreate;
   });
 
   const contexto = criarContexto();
+  contexto.req.session.usuario.nome = 'Técnico de origem';
+  const registrosAuditoria = [];
   Chamado.findByPk = async () => contexto.chamado;
+  RegistroAuditoria.create = async registro => {
+    registrosAuditoria.push(registro);
+    return {};
+  };
   Usuario.findOne = async ({ where }) => (
     where.id === 30 && where.departamentoId === 2 && where.perfil === 'tecnico'
       ? { id: 30 }
@@ -67,20 +82,26 @@ test('transfere chamado com departamento e técnico do destino', async (t) => {
     status: 'em_andamento'
   }]);
   assert.equal(contexto.respostas.redirectUrl, '/chamados/42');
+  assert.equal(registrosAuditoria[0].acao, 'chamado_transferido');
+  assert.equal(registrosAuditoria[0].transferidoParaId, 30);
 });
 
 test('rejeita técnico que não pertence ao departamento de destino', async (t) => {
   const originals = {
     findByPk: Chamado.findByPk,
-    usuarioFindOne: Usuario.findOne
+    usuarioFindOne: Usuario.findOne,
+    registroCreate: RegistroAuditoria.create
   };
   t.after(() => {
     Chamado.findByPk = originals.findByPk;
     Usuario.findOne = originals.usuarioFindOne;
+    RegistroAuditoria.create = originals.registroCreate;
   });
 
   const contexto = criarContexto();
+  contexto.req.session.usuario.nome = 'Técnico de origem';
   Chamado.findByPk = async () => contexto.chamado;
+  RegistroAuditoria.create = async () => ({});
   Usuario.findOne = async () => null;
 
   await chamadoController.transferir(contexto.req, contexto.respostas);
@@ -93,17 +114,21 @@ test('rejeita técnico que não pertence ao departamento de destino', async (t) 
 test('mantém a categoria quando a transferência fica no mesmo departamento', async (t) => {
   const originals = {
     findByPk: Chamado.findByPk,
-    usuarioFindOne: Usuario.findOne
+    usuarioFindOne: Usuario.findOne,
+    registroCreate: RegistroAuditoria.create
   };
   t.after(() => {
     Chamado.findByPk = originals.findByPk;
     Usuario.findOne = originals.usuarioFindOne;
+    RegistroAuditoria.create = originals.registroCreate;
   });
 
   const contexto = criarContexto();
+  contexto.req.session.usuario.nome = 'Técnico de origem';
   contexto.req.body.departamentoId = '1';
   contexto.chamado.categoriaChamadoId = 7;
   Chamado.findByPk = async () => contexto.chamado;
+  RegistroAuditoria.create = async () => ({});
   Usuario.findOne = async ({ where }) => (
     where.id === 30 && where.departamentoId === 1 && where.perfil === 'tecnico'
       ? { id: 30 }

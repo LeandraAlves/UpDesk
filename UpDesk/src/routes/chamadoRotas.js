@@ -3,6 +3,18 @@ const router = express.Router();
 const chamadoController = require('../controllers/chamadoController');
 
 router.get('/', chamadoController.listar);
+router.get('/novo', chamadoController.novo);
 router.post('/cadastrar', chamadoController.cadastrar);
+router.get('/editar/:id', chamadoController.editar);
+router.post('/editar/:id', chamadoController.atualizar);
+router.post('/:id/comentarios', chamadoController.comentar);
+router.post('/:id/etiquetas', chamadoController.atualizarEtiquetas);
+router.post('/:id/assumir', chamadoController.assumir);
+router.post('/:id/resolver', chamadoController.resolver);
+router.post('/:id/reabrir', chamadoController.reabrir);
+router.post('/:id/transferir', chamadoController.transferir);
+router.post('/:id/cancelar', chamadoController.cancelar);
+router.post('/:id/excluir', chamadoController.excluir);
+router.get('/:id', chamadoController.detalhes);
 
 module.exports = router;

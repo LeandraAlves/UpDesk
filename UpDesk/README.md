@@ -1,189 +1,133 @@
 # UpDesk — Sistema de gerenciamento de chamados
 
-**Disciplina:** Programação Backend  
-**Curso:** Sistemas de Informação — UNIVAS  
-**Professor:** Raffael Carvalho  
-**Entrega:** Release 3 — Funcionalidades
+Aplicação web para registrar, organizar e acompanhar solicitações de suporte técnico.
 
-> **Status:** Requisitos funcionais da Release 3 implementados. Confirmar commits de todos os integrantes; deploy permanece fora do escopo atual.
+**Acesso público:** [https://updesk-nru0.onrender.com](https://updesk-nru0.onrender.com)
 
-## 1. Equipe e papéis
+**Disciplina:** Programação Backend — Sistemas de Informação, UNIVAS
+**Professor:** Raffael Carvalho
 
-| Integrante | Papel | Responsabilidades |
-|---|---|---|
-| Leandra | Product Owner | Organizar requisitos, backlog, prioridades e acompanhar entregas |
-| Karem | Frontend | Desenvolver telas, navegação e experiência do usuário |
-| Gabriela | Backend | Implementar rotas, controllers, autenticação e regras de negócio |
-| João Pedro Alvarenga | Banco de Dados e Integração/Deploy | Modelar dados, configurar MySQL/Sequelize, integrar, testar e publicar |
+## Funcionalidades
 
-Todos os integrantes deverão contribuir com commits e compreender o funcionamento do sistema.
+- Cadastro, login e logout; senhas armazenadas com hash.
+- Perfis de administrador, técnico e cliente, com autorização no backend.
+- Abertura, consulta, atualização e cancelamento de chamados.
+- Organização por departamentos e categorias de chamados.
+- Atribuição e transferência de chamados entre departamentos e técnicos.
+- Comentários no chamado e chat entre integrantes da equipe técnica.
+- Filtros e paginação na lista de chamados.
+- Prazos calculados conforme a prioridade, considerando dias úteis, e indicação de atrasos.
+- Dashboard com indicadores e gráficos; impressão pelo navegador para salvar relatórios em PDF.
+- Administração de usuários, departamentos e categorias; administradores podem editar nome, e-mail, perfil e departamento dos usuários, além de redefinir a senha opcionalmente.
+- Logs de auditoria registram alterações e operações relevantes com autor, data, registro e detalhes. Administradores consultam todo o histórico, com paginação; técnicos veem apenas transferências recebidas por eles.
+- Notificações por e-mail somente ao cliente do chamado e ao técnico atualmente atribuído: abertura, atribuição/transferência, atualizações, mudanças de status e mensagens. Administradores não recebem cópias.
 
-## 2. Problema, público-alvo e solução
+## Perfis de acesso
 
-**Problema:** solicitações de suporte técnico feitas por mensagens, e-mails ou verbalmente podem se perder e dificultar a identificação de responsáveis, prioridades e prazos.
-
-**Público-alvo:** pequenas e médias empresas com equipes internas de suporte, especialmente de TI.
-
-**Solução proposta:** uma aplicação web centralizada para registrar, classificar, acompanhar e resolver chamados, mantendo histórico de atendimento e indicadores.
-
-**Objetivo:** melhorar a organização e a rastreabilidade das solicitações de suporte técnico.
-
-## 3. Backlog — histórias de usuário
-
-| ID | História de usuário | Prioridade |
-|---|---|---|
-| HU01 | Como funcionário, quero criar uma conta para solicitar e acompanhar suporte. | Alta |
-| HU02 | Como usuário, quero fazer login e logout para proteger minhas informações e sessões. | Alta |
-| HU03 | Como funcionário, quero abrir chamados para receber ajuda com problemas técnicos. | Alta |
-| HU04 | Como funcionário, quero acompanhar o status dos meus chamados para me planejar enquanto aguardo o atendimento. | Alta |
-| HU05 | Como técnico, quero visualizar chamados pendentes para priorizar o trabalho da equipe. | Alta |
-| HU06 | Como técnico, quero atualizar o status e registrar a solução de um chamado para informar o andamento e documentar a resolução. | Alta |
-| HU07 | Como administrador, quero gerenciar categorias e departamentos para padronizar a classificação das solicitações. | Alta |
-| HU08 | Como usuário, quero comentar em chamados para esclarecer dúvidas durante o atendimento. | Média |
-| HU09 | Como administrador, quero consultar gráficos para identificar volumes e atrasos no suporte. | Média |
-| HU10 | Como usuário, quero pesquisar e filtrar chamados para localizar solicitações sem percorrer toda a lista. | Média |
-| HU11 | Como administrador, quero exportar relatórios para compartilhar indicadores com a gestão. | Média |
-| HU12 | Como usuário, quero receber notificações de alterações para saber quando houver novidades no atendimento. | Média |
-
-## 4. Checklist dos requisitos obrigatórios
-
-- [x] **8 telas distintas:** Login, Cadastro, Dashboard, Chamados, Novo Chamado, Detalhes/Edição, Categorias e Departamentos.
-- [x] **5 entidades de negócio além de Usuário:** Chamado, Categoria, Departamento, Comentário e Etiqueta.
-- [x] **CRUDs obrigatórios:** Chamados (abrir, listar, editar e cancelar/excluir conforme perfil), Categorias e Departamentos (criar, listar, editar e excluir com proteção de dependências).
-- [x] **Relacionamento 1:N:** Departamento → Chamados.
-- [x] **Relacionamento N:N:** Chamados ↔ Etiquetas, com tabela intermediária.
-- [x] **Regra de negócio:** prazo calculado conforme prioridade (alta: 1 dia útil; média: 3 dias úteis; baixa: 5 dias úteis), com alerta de atraso.
-- [x] **Busca/filtro e paginação:** na listagem de chamados.
-- [x] **Autenticação:** cadastro, login e logout; senhas armazenadas com hash.
-- [x] **Autorização:** perfis de administrador, técnico e cliente validados no backend. O administrador gerencia o sistema; técnicos acessam a fila e os chamados atribuídos; clientes abrem e acompanham seus próprios chamados.
-- [x] **Proteção:** telas e endpoints privados acessíveis somente após autenticação.
-- [x] **Validação:** validação no backend com mensagens claras.
-- [x] **Boas práticas:** Sequelize (ORM), variáveis de ambiente em `.env` fora do Git e consultas seguras.
-- [ ] **Git:** repositório, README, commits de todos os membros.
-- [ ] **Deploy:** aplicação publicada em URL pública.
-
-## 5. Extras selecionados — mínimo de 8 pontos
-
-| Funcionalidade | Pontos |
-|---|---:|
-| Layout responsivo para celular | 1 (implementado) |
-| Dashboard com gráficos | 2 (implementado) |
-| Exportação do dashboard e chamados em PDF via impressão do navegador | 1 (implementado) |
-| Testes automatizados (19 testes) | 2 (implementado) |
-| Notificações por e-mail | 2 (pendente) |
-| Log de auditoria de alterações | 2 (pendente) |
-| **Total implementado** | **6 de 8** |
-
-> A pontuação só será obtida se os extras estiverem funcionando na demonstração final.
-
-## 6. Tecnologias e justificativas
-
-| Tecnologia | Justificativa |
+| Perfil | Acesso principal |
 |---|---|
-| HTML5, CSS3 e JavaScript | Estrutura, estilo e interatividade das telas |
-| Node.js | Execução do backend em JavaScript, conforme estudado na disciplina |
-| Express | Rotas HTTP e middlewares |
-| EJS | Renderização de páginas dinâmicas |
-| MySQL | Persistência dos dados relacionais |
-| Sequelize | Models, relacionamentos e operações de banco com ORM |
-| Arquitetura MVC | Separação entre Model, View e Controller |
-| Git e GitHub | Versionamento e colaboração |
+| Administrador | Gerencia usuários, departamentos e categorias; acompanha e administra os chamados. |
+| Técnico | Trabalha na fila e nos chamados atribuídos ao seu departamento; pode conversar com a equipe. |
+| Cliente | Abre chamados e acompanha os próprios atendimentos. |
 
-### Executar localmente
+## Tecnologias
 
-1. Instale as dependências com `npm install` e crie um banco MySQL (por padrão, `updesk_db`).
-2. Configure `DB_HOST`, `DB_NOME`, `DB_USUARIO`, `DB_SENHA` e `SESSION_SECRET`. Na primeira inicialização, informe também `ADMIN_EMAIL` e `ADMIN_SENHA` para criar o administrador inicial (opcionalmente, `ADMIN_NOME`). Não coloque credenciais no Git; em produção, `SESSION_SECRET` é obrigatório.
-3. Inicie o servidor com `node app.js`. O Sequelize sincroniza os modelos antes de iniciar o servidor.
+Node.js, Express, EJS, Sequelize, MySQL, `express-session` e `bcryptjs`.
 
-Os modelos e associações ficam em `src/models`; tabelas e chaves são sincronizadas pelo Sequelize na inicialização.
+## Estrutura do projeto
 
-## 7. Esboço das telas
-
-| Tela | Elementos planejados |
-|---|---|
-| 1. Login | E-mail, senha e link para cadastro |
-| 2. Cadastro | Nome, e-mail, senha e confirmação |
-| 3. Dashboard | Indicadores e gráficos dos chamados |
-| 4. Chamados | Tabela com pesquisa, filtros, paginação e ações |
-| 5. Novo Chamado | Título, descrição, categoria e prioridade |
-| 6. Detalhes/Edição | Dados do chamado, comentários, responsável e status |
-| 7. Categorias | Listagem e formulários de cadastro/edição/exclusão |
-| 8. Departamentos | Listagem e formulários de cadastro/edição/exclusão |
-
-**Esboço inicial das oito telas (rascunho em preto e branco):**
-
-![Esboço inicial das 8 telas do UpDesk](esboco_8_telas.png.png)
-
-*Figura 1 — Wireframes preliminares do UpDesk, feitos com aparência de desenho no papel. O desenho é conceitual e pode ser refinado durante o desenvolvimento.*
-
-## 8. Modelo de dados — DER inicial
-
-| Entidade | Campos principais |
-|---|---|
-| Usuario | id, nome, email, senha_hash, perfil, departamento_id |
-| Departamento | id, nome, descricao |
-| CategoriaChamado | id, nome, descricao, departamento_id |
-| Chamado | id, titulo, descricao, status, prioridade, prazo, usuario_id, departamento_id, categoria_chamado_id, tecnico_id |
-| Comentario | id, texto, chamado_id, usuario_id, data_criacao |
-| Etiqueta | id, nome |
-| Chamado_Etiqueta | chamado_id, etiqueta_id (associação N:N) |
-
-**Relacionamentos previstos:** Departamento 1:N Chamado e CategoriaChamado; CategoriaChamado 1:N Chamado; Usuário 1:N Chamado; Chamado 1:N Comentário; Chamado N:N Etiqueta via Chamado_Etiqueta.
-
-### Diagrama conceitual preliminar
-
-```mermaid
-erDiagram
-    USUARIO ||--o{ CHAMADO : abre
-    USUARIO ||--o{ COMENTARIO : escreve
-    DEPARTAMENTO ||--o{ CHAMADO : recebe
-    CATEGORIA_CHAMADO ||--o{ CHAMADO : classifica
-    CHAMADO ||--o{ COMENTARIO : possui
-    CHAMADO ||--o{ CHAMADO_ETIQUETA : possui
-    ETIQUETA ||--o{ CHAMADO_ETIQUETA : identifica
+```text
+app.js                 Inicialização do servidor e registro das rotas
+src/
+  config/              Banco de dados, configuração inicial e migrações
+  controllers/         Regras de negócio e tratamento das requisições
+  middlewares/         Autenticação e autorização
+  models/              Modelos Sequelize e associações
+  public/              CSS e JavaScript do navegador
+  routes/              Rotas Express
+  utils/               Funções auxiliares
+  views/               Páginas EJS e componentes compartilhados
+test/                  Testes automatizados
+archive/               Snapshot legado, fora da execução da aplicação
 ```
 
-> DER conceitual preliminar, sujeito a ajustes. Os campos e chaves principais estão na tabela anterior; `tecnico_id` referencia um usuário responsável pelo atendimento.
+## Executar localmente
 
-## Ajustes de atendimento
+Requisitos: Node.js e acesso a um banco MySQL com conexão SSL habilitada.
 
-- Categorias de chamados são independentes dos tipos de usuário e sempre pertencem a um departamento.
-- Na abertura de um chamado, o departamento é selecionado antes da categoria e limita as categorias disponíveis. O administrador também pode filtrar categorias por departamento.
-- Chamados podem ser filtrados por texto, status, categoria, departamento, gravidade e solicitante. Os itens do dashboard levam à listagem com o filtro correspondente.
-- Técnicos veem na fila somente chamados não atribuídos do próprio departamento, podem transferir chamados atribuídos a outros técnicos do mesmo departamento e marcar chamados como resolvidos.
-- O painel inicial da administração é identificado como “Início”; o painel de desempenho da equipe fica restrito ao administrador.
-- O detalhe do chamado mantém o histórico de mensagens entre solicitante e técnico. O cliente vê a própria lista sem filtros.
-- Cadastros, alterações e mensagens refletem na tela sem recarregar a página inteira; categorias de chamados têm gerenciamento exclusivo do administrador.
+1. Instale as dependências:
 
-## 9. Repositório e quadro de tarefas
+   ```bash
+   npm install
+   ```
 
-- **Repositório GitHub:** `https://github.com/LeandraAlves/UpDesk`
-- **Integrantes com acesso:** Leandra, Karem, Gabriela e João Pedro Alvarenga — **convites/acessos a confirmar**.
-- **Quadro de tarefas:** `PENDENTE — inserir URL após criação`
-- **Colunas sugeridas:** A fazer → Em andamento → Em testes → Concluído.
+2. Copie `.env.example` para `.env` e preencha as configurações:
 
-### Tarefas iniciais
+   | Variável | Uso |
+   |---|---|
+   | `DB_HOST`, `DB_PORT` | Endereço e porta do MySQL (`3306` por padrão). |
+   | `DB_NOME`, `DB_USUARIO`, `DB_SENHA` | Banco e credenciais. |
+   | `SESSION_SECRET` | Segredo da sessão; obrigatório em produção. |
+   | `ADMIN_EMAIL`, `ADMIN_SENHA` | Criam o primeiro administrador quando ainda não existe um. |
+   | `ADMIN_NOME` | Nome opcional do administrador inicial. |
+   | `PORT` | Porta HTTP; o padrão local é `3000`. |
+   | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE` | Servidor SMTP; use `true` em conexão TLS implícita, normalmente na porta `465`. |
+   | `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Credenciais SMTP e endereço remetente (`SMTP_FROM` pode usar o usuário SMTP). |
+   | `APP_URL` | URL pública usada nos links dos e-mails. |
 
-- [x] Criar repositório e adicionar todos os integrantes.
-- [x] Criar quadro de tarefas e distribuir responsabilidades.
-- [ ] Validar e, se necessário, refinar os esboços das oito telas com o professor.
-- [ ] Revisar e finalizar o DER.
-- [ ] Apresentar a proposta e obter aprovação do professor.
+   Não inclua credenciais ou segredos no Git.
 
-## 10. Cronograma de releases
+3. Inicie o servidor:
 
-| Release | Entrega prevista |
+   ```bash
+   node app.js
+   ```
+
+   Na inicialização, o Sequelize sincroniza os modelos e executa as tarefas de migração do projeto.
+
+O cadastro público cria contas de cliente. O administrador inicial pode criar contas de técnico pela área de usuários.
+
+## Testes
+
+Execute a suíte automatizada com:
+
+```bash
+npm test
+```
+
+Os 24 testes automatizados cobrem autorização, prazos, validações, transferência de chamados, edição de usuários, auditoria e destinatários das notificações. Eles não substituem a validação da aplicação publicada nem um teste com o SMTP de produção.
+
+## Produção
+
+- **Aplicação:** [Render — UpDesk](https://updesk-nru0.onrender.com)
+- **Banco de dados:** MySQL hospedado no Aiven
+
+No Render, configure as variáveis de banco, `SESSION_SECRET` e as credenciais SMTP para ativar os e-mails. Configure também `APP_URL` com a URL pública. Se for a primeira inicialização sem administrador, informe `ADMIN_EMAIL` e `ADMIN_SENHA`. O serviço fornece a variável `PORT`. Mantenha os segredos nas configurações do serviço, nunca no repositório.
+
+## Release 4 — Versão final
+
+| Funcionalidade adicional | Pontos |
+|---|---:|
+| Layout responsivo para celular | 1 |
+| Dashboard com gráficos | 2 |
+| Impressão de relatórios em PDF pelo navegador | 1 |
+| Notificações por e-mail | 2 |
+| Logs de auditoria | 2 |
+| **Total** | **8 de 8** |
+
+- **Testes automatizados:** 24 testes aprovados com `npm test`.
+- **Versão publicada:** [https://updesk-nru0.onrender.com](https://updesk-nru0.onrender.com).
+- **Criação de contas para demonstração:** configure o administrador inicial com `ADMIN_EMAIL` e `ADMIN_SENHA`; clientes podem se cadastrar e o administrador pode criar contas de técnico. Não inclua senhas de teste neste README.
+
+## Equipe
+
+| Integrante | Responsabilidade principal |
 |---|---|
-| Release 1 — Concepção | Tema, equipe, backlog, requisitos, tecnologias, esboços, DER, repositório e quadro de tarefas |
-| Release 2 — Fundação | Frontend/backend/banco integrados, autenticação, primeiro CRUD e deploy inicial |
-| Release 3 — Funcionalidades | CRUDs, relacionamentos, permissões, regra de negócio, filtros, paginação e oito telas |
-| Release 4 — Versão final | Extras, testes, correções, README final, deploy e preparação da apresentação |
+| Leandra | Produto e organização dos requisitos |
+| Karem | Interface e experiência do usuário |
+| Gabriela | Backend, rotas e autenticação |
+| João Pedro Alvarenga | Banco de dados e integração |
 
-## 11. Situação do projeto
+## Uso de IA
 
-**Release atual:** Requisitos da Release 3 implementados; deploy excluído do escopo atual.
-**Pendências:** confirmar commits de todos os integrantes, notificações por e-mail, log de auditoria, testes de integração com MySQL e deploy. O esboço das telas permanece como referência visual.
-
----
-
-**Uso de IA:** A IA foi utilizado como apoio à organização e redação da proposta da Release 1.
+A IA foi usada como apoio na programação e na documentação. A equipe revisou as alterações e é responsável pelo projeto.

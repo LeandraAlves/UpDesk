@@ -37,10 +37,16 @@
       <a href="/ti/equipe" class="nav-item <%= rotaAtiva === 'equipe' ? 'active' : '' %>">
         <span>👥</span> Equipe
       </a>
+      <a href="/auditoria" class="nav-item <%= rotaAtiva === 'auditoria' ? 'active' : '' %>">
+        <span>🧾</span> Acompanhamento
+      </a>
     <% } %>
     <% if (perfilUser === 'admin') { %>
       <a href="/ti/desempenho" class="nav-item <%= rotaAtiva === 'desempenho' ? 'active' : '' %>">
         <span>📈</span> Desempenho
+      </a>
+      <a href="/auditoria" class="nav-item <%= rotaAtiva === 'auditoria' ? 'active' : '' %>">
+        <span>🧾</span> Acompanhamento
       </a>
       <a href="/categorias" class="nav-item <%= rotaAtiva === 'categorias-chamado' ? 'active' : '' %>">
         <span>🗂️</span> Categorias de chamados

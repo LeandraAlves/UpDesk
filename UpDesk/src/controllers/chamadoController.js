@@ -7,6 +7,8 @@ const Usuario = require('../models/Usuario');
 const CategoriaChamado = require('../models/CategoriaChamado');
 const Departamento = require('../models/Departamento');
 const { calcularPrazo } = require('../utils/prazoChamado');
+const registrarAuditoria = require('../utils/registrarAuditoria');
+const notificacaoEmail = require('../services/notificacaoEmail');
 
 const prioridades = ['baixa', 'media', 'alta'];
 const statusPermitidos = ['aberto', 'em_andamento', 'aguardando', 'fechado'];
@@ -257,7 +259,7 @@ exports.cadastrar = async (req, res) => {
     if (categoria.departamentoId !== departamentoId) {
       return res.status(400).send('A categoria selecionada não pertence ao departamento informado.');
     }
-    await Chamado.create({
+    const chamado = await Chamado.create({
       titulo,
       descricao,
       prioridade,
@@ -268,6 +270,19 @@ exports.cadastrar = async (req, res) => {
       categoriaChamadoId: categoria.id,
       departamentoId
     });
+    await registrarAuditoria(req, {
+      acao: 'chamado_criado',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      detalhes: {
+        titulo,
+        prioridade,
+        status: 'aberto',
+        categoriaChamadoId: categoria.id,
+        departamentoId
+      }
+    });
+    await notificacaoEmail.notificarChamado(req, chamado, 'aberto');
     return res.redirect('/chamados');
   } catch (erro) {
     console.error('Erro ao cadastrar chamado:', erro);
@@ -426,7 +441,41 @@ exports.atualizar = async (req, res) => {
       atualizacao.tecnicoId = usuario.id;
     }
 
+    const antes = {
+      titulo: chamado.titulo,
+      descricao: chamado.descricao,
+      prioridade: chamado.prioridade,
+      status: chamado.status,
+      local: chamado.local,
+      categoriaChamadoId: chamado.categoriaChamadoId,
+      departamentoId: chamado.departamentoId,
+      tecnicoId: chamado.tecnicoId
+    };
     await chamado.update(atualizacao);
+    const depois = {
+      titulo: chamado.titulo,
+      descricao: chamado.descricao,
+      prioridade: chamado.prioridade,
+      status: chamado.status,
+      local: chamado.local,
+      categoriaChamadoId: chamado.categoriaChamadoId,
+      departamentoId: chamado.departamentoId,
+      tecnicoId: chamado.tecnicoId
+    };
+    await registrarAuditoria(req, {
+      acao: antes.tecnicoId !== depois.tecnicoId && depois.tecnicoId
+        ? 'chamado_transferido'
+        : 'chamado_editado',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      transferidoParaId: antes.tecnicoId !== depois.tecnicoId ? depois.tecnicoId : null,
+      detalhes: { antes, depois }
+    });
+    await notificacaoEmail.notificarChamado(
+      req,
+      chamado,
+      antes.tecnicoId !== depois.tecnicoId ? 'atribuido' : 'atualizado'
+    );
     return res.redirect(`/chamados/${chamado.id}`);
   } catch (erro) {
     console.error('Erro ao atualizar chamado:', erro);
@@ -464,6 +513,18 @@ exports.assumir = async (req, res) => {
     if (!atualizados) {
       return res.status(409).send('Outro técnico assumiu este chamado primeiro.');
     }
+    await registrarAuditoria(req, {
+      acao: 'chamado_atribuido',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      detalhes: {
+        tecnicoAnteriorId: null,
+        tecnicoNovoId: req.session.usuario.id,
+        statusAnterior: 'aberto',
+        statusNovo: 'em_andamento'
+      }
+    });
+    await notificacaoEmail.notificarChamado(req, chamado, 'atribuido');
     return res.redirect(`/chamados/${chamado.id}`);
   } catch (erro) {
     console.error('Erro ao assumir chamado:', erro);
@@ -485,7 +546,15 @@ exports.resolver = async (req, res) => {
     if (['fechado', 'cancelado'].includes(chamado.status)) {
       return res.status(409).send('Este chamado já está encerrado.');
     }
+    const statusAnterior = chamado.status;
     await chamado.update({ status: 'fechado' });
+    await registrarAuditoria(req, {
+      acao: 'chamado_resolvido',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      detalhes: { statusAnterior, statusNovo: chamado.status }
+    });
+    await notificacaoEmail.notificarChamado(req, chamado, 'status');
     return res.redirect(`/chamados/${chamado.id}`);
   } catch (erro) {
     console.error('Erro ao resolver chamado:', erro);
@@ -507,7 +576,15 @@ exports.reabrir = async (req, res) => {
     if (chamado.status !== 'fechado') {
       return res.status(409).send('Somente chamados resolvidos podem ser reabertos.');
     }
+    const statusAnterior = chamado.status;
     await chamado.update({ status: chamado.tecnicoId ? 'em_andamento' : 'aberto' });
+    await registrarAuditoria(req, {
+      acao: 'chamado_reaberto',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      detalhes: { statusAnterior, statusNovo: chamado.status }
+    });
+    await notificacaoEmail.notificarChamado(req, chamado, 'status');
     return res.redirect(`/chamados/${chamado.id}`);
   } catch (erro) {
     console.error('Erro ao reabrir chamado:', erro);
@@ -547,6 +624,12 @@ exports.transferir = async (req, res) => {
     if (tecnico.id === chamado.tecnicoId) {
       return res.status(400).send('Selecione um técnico diferente do responsável atual.');
     }
+    const dadosAnteriores = {
+      departamentoId: chamado.departamentoId,
+      categoriaChamadoId: chamado.categoriaChamadoId,
+      tecnicoId: chamado.tecnicoId,
+      status: chamado.status
+    };
     await chamado.update({
       departamentoId,
       categoriaChamadoId: departamentoId === Number(chamado.departamentoId)
@@ -555,6 +638,24 @@ exports.transferir = async (req, res) => {
       tecnicoId: tecnico.id,
       status: 'em_andamento'
     });
+    await registrarAuditoria(req, {
+      acao: 'chamado_transferido',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      transferidoParaId: tecnico.id,
+      detalhes: {
+        titulo: chamado.titulo,
+        departamentoAnteriorId: dadosAnteriores.departamentoId,
+        departamentoNovoId: departamentoId,
+        categoriaAnteriorId: dadosAnteriores.categoriaChamadoId,
+        categoriaNovaId: chamado.categoriaChamadoId,
+        tecnicoAnteriorId: dadosAnteriores.tecnicoId,
+        tecnicoNovoId: tecnico.id,
+        statusAnterior: dadosAnteriores.status,
+        statusNovo: chamado.status
+      }
+    });
+    await notificacaoEmail.notificarChamado(req, chamado, 'atribuido');
     return res.redirect(`/chamados/${chamado.id}`);
   } catch (erro) {
     console.error('Erro ao transferir chamado:', erro);
@@ -575,12 +676,19 @@ exports.comentar = async (req, res) => {
     if (!podeAcessar(chamado, req.session.usuario)) {
       return res.status(403).send('Você não tem acesso a este chamado.');
     }
-    await Comentario.create({
+    const comentario = await Comentario.create({
       texto,
       chamadoId: chamado.id,
       usuarioId: req.session.usuario.id
     });
     await chamado.update({ updatedAt: new Date() });
+    await registrarAuditoria(req, {
+      acao: 'mensagem_chamado_enviada',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      detalhes: { comentarioId: comentario.id, autorId: req.session.usuario.id }
+    });
+    await notificacaoEmail.notificarChamado(req, chamado, 'mensagem');
     return res.redirect(`/chamados/${chamado.id}`);
   } catch (erro) {
     console.error('Erro ao adicionar comentário:', erro);
@@ -611,7 +719,15 @@ exports.atualizarEtiquetas = async (req, res) => {
       const [etiqueta] = await Etiqueta.findOrCreate({ where: { nome } });
       etiquetas.push(etiqueta);
     }
+    const etiquetasAnteriores = chamado.etiquetas.map(etiqueta => etiqueta.nome);
     await chamado.setEtiquetas(etiquetas);
+    await registrarAuditoria(req, {
+      acao: 'etiquetas_chamado_alteradas',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      detalhes: { antes: etiquetasAnteriores, depois: nomes }
+    });
+    await notificacaoEmail.notificarChamado(req, chamado, 'atualizado');
     return res.redirect(`/chamados/${chamado.id}`);
   } catch (erro) {
     console.error('Erro ao atualizar etiquetas:', erro);
@@ -629,6 +745,13 @@ exports.cancelar = async (req, res) => {
       return res.status(403).send('Só é possível cancelar seus próprios chamados ainda abertos.');
     }
     await chamado.update({ status: 'cancelado' });
+    await registrarAuditoria(req, {
+      acao: 'chamado_cancelado',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      detalhes: { statusAnterior: 'aberto', statusNovo: 'cancelado' }
+    });
+    await notificacaoEmail.notificarChamado(req, chamado, 'status');
     return res.redirect(`/chamados/${chamado.id}`);
   } catch (erro) {
     console.error('Erro ao cancelar chamado:', erro);
@@ -650,7 +773,20 @@ exports.excluir = async (req, res) => {
     }
     await Comentario.destroy({ where: { chamadoId: chamado.id }, transaction: transacao });
     await ChamadoEtiqueta.destroy({ where: { chamadoId: chamado.id }, transaction: transacao });
+    const detalhes = {
+      titulo: chamado.titulo,
+      usuarioId: chamado.usuarioId,
+      tecnicoId: chamado.tecnicoId,
+      departamentoId: chamado.departamentoId,
+      status: chamado.status
+    };
     await chamado.destroy({ transaction: transacao });
+    await registrarAuditoria(req, {
+      acao: 'chamado_excluido',
+      entidade: 'chamado',
+      entidadeId: chamado.id,
+      detalhes
+    }, transacao);
     await transacao.commit();
     return res.redirect('/chamados');
   } catch (erro) {

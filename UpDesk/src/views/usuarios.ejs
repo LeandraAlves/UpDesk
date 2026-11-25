@@ -22,6 +22,7 @@
         </div>
         <% if (sucesso === 'excluido') { %><div class="card" role="status">Usuário excluído com sucesso.</div><% } %>
         <% if (sucesso === 'criado') { %><div class="card" role="status">Usuário cadastrado com sucesso.</div><% } %>
+        <% if (sucesso === 'editado') { %><div class="card" role="status">Usuário atualizado com sucesso.</div><% } %>
 
         <div class="split-grid">
           <div class="card">
@@ -63,6 +64,7 @@
                           <% } %>
                         </td>
                         <td>
+                          <a href="/usuarios/editar/<%= u.id %>" class="btn btn-secondary btn-sm">Editar</a>
                           <% if (u.id !== usuario.id) { %>
                             <form action="/usuarios/excluir/<%= u.id %>" method="POST" onsubmit="return confirm('Excluir este usuário?')">
                               <button type="submit" class="btn-danger-icon">🗑️ Excluir</button>
@@ -82,30 +84,30 @@
           </div>
 
           <div class="card" style="border-top: 4px solid #1a73e8;">
-            <h2 class="card-title">Novo Usuário</h2>
-            <form action="/usuarios/cadastrar" method="POST">
+            <h2 class="card-title"><%= usuarioEdicao ? 'Editar Usuário' : 'Novo Usuário' %></h2>
+            <form action="<%= usuarioEdicao ? `/usuarios/editar/${usuarioEdicao.id}` : '/usuarios/cadastrar' %>" method="POST">
               <div class="form-group">
                 <label class="form-label">Nome do Usuário <span class="req">*</span></label>
-                <input type="text" name="nome" class="form-control" maxlength="255" placeholder="Nome completo" required>
+                <input type="text" name="nome" class="form-control" maxlength="255" placeholder="Nome completo" value="<%= usuarioEdicao ? usuarioEdicao.nome : '' %>" required>
               </div>
 
               <div class="form-group">
                 <label class="form-label">E-mail <span class="req">*</span></label>
-                <input type="email" name="email" class="form-control" maxlength="255" placeholder="email@empresa.com" required>
+                <input type="email" name="email" class="form-control" maxlength="255" placeholder="email@empresa.com" value="<%= usuarioEdicao ? usuarioEdicao.email : '' %>" required>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Senha <span class="req">*</span></label>
-                <input type="password" name="senha" class="form-control" minlength="8" placeholder="Senha de acesso" required>
+                <label class="form-label">Senha <% if (!usuarioEdicao) { %><span class="req">*</span><% } %></label>
+                <input type="password" name="senha" class="form-control" minlength="8" placeholder="<%= usuarioEdicao ? 'Deixe em branco para manter a senha atual' : 'Senha de acesso' %>" <%= usuarioEdicao ? '' : 'required' %>>
               </div>
 
               <div class="form-group">
                 <label class="form-label">Perfil <span class="req">*</span></label>
                 <select name="perfil" id="perfilSelect" class="form-control" required onchange="verificarPerfil()">
                   <option value="">Selecione o Perfil...</option>
-                  <option value="tecnico">Técnico</option>
-                  <option value="admin">Admin</option>
-                  <option value="cliente">Cliente</option>
+                  <option value="tecnico" <%= usuarioEdicao && usuarioEdicao.perfil === 'tecnico' ? 'selected' : '' %>>Técnico</option>
+                  <option value="admin" <%= usuarioEdicao && usuarioEdicao.perfil === 'admin' ? 'selected' : '' %>>Admin</option>
+                  <option value="cliente" <%= usuarioEdicao && usuarioEdicao.perfil === 'cliente' ? 'selected' : '' %>>Cliente</option>
                 </select>
               </div>
 
@@ -115,13 +117,14 @@
                   <option value="">Selecione o Departamento...</option>
                   <% if (typeof departamentos !== 'undefined') { %>
                     <% departamentos.forEach(dep => { %>
-                      <option value="<%= dep.id %>"><%= dep.nome %></option>
+                      <option value="<%= dep.id %>" <%= usuarioEdicao && usuarioEdicao.departamentoId === dep.id ? 'selected' : '' %>><%= dep.nome %></option>
                     <% }) %>
                   <% } %>
                 </select>
               </div>
 
-              <button type="submit" class="btn btn-primary" style="width:100%; margin-top:12px; padding: 12px;">💾 Salvar Usuário</button>
+              <button type="submit" class="btn btn-primary" style="width:100%; margin-top:12px; padding: 12px;"><%= usuarioEdicao ? 'Salvar alterações' : '💾 Salvar Usuário' %></button>
+              <% if (usuarioEdicao) { %><a href="/usuarios" class="btn btn-secondary" style="display:block; text-align:center; margin-top:8px;">Cancelar</a><% } %>
             </form>
           </div>
         </div>
@@ -138,6 +141,7 @@
 
       campoDep.style.display = precisaDepartamento ? 'block' : 'none';
       departamentoSelect.disabled = !precisaDepartamento;
+      departamentoSelect.required = precisaDepartamento;
       if (!precisaDepartamento) {
         departamentoSelect.value = '';
       }

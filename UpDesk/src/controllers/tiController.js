@@ -4,6 +4,7 @@ const Usuario = require('../models/Usuario');
 const CategoriaChamado = require('../models/CategoriaChamado');
 const Departamento = require('../models/Departamento');
 const MensagemEquipe = require('../models/MensagemEquipe');
+const registrarAuditoria = require('../utils/registrarAuditoria');
 
 const ehAdmin = (usuario) => ['admin', 'gerencia'].includes(usuario.perfil);
 
@@ -250,6 +251,12 @@ exports.enviarMensagemEquipe = async (req, res) => {
       remetenteId: usuario.id,
       destinatarioId: resultado.tecnico.id,
       texto
+    });
+    await registrarAuditoria(req, {
+      acao: 'mensagem_equipe_enviada',
+      entidade: 'mensagem_equipe',
+      entidadeId: mensagem.id,
+      detalhes: { remetenteId: usuario.id, destinatarioId: resultado.tecnico.id }
     });
     return res.status(201).json({
       mensagem: {

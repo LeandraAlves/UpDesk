@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acompanhamento - UpDesk</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <%- include('../partials/sidebar', { paginaAtiva: 'auditoria' }) %>
+    <div class="main-wrapper">
+      <%- include('../partials/topbar') %>
+      <main class="content-area">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Acompanhamento</h1>
+            <p class="page-subtitle"><%= usuario.perfil === 'tecnico' ? 'Chamados transferidos para você.' : 'Chamados assumidos, transferidos e finalizados.' %></p>
+            <p class="text-muted"><%= total %> registro(s)</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Data e hora</th>
+                  <th>Quem realizou</th>
+                  <th>Ação</th>
+                  <th>Chamado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (registros.length) { %>
+                  <% registros.forEach(registro => { %>
+                    <tr>
+                      <td><%= new Date(registro.createdAt).toLocaleString('pt-BR') %></td>
+                      <td><strong><%= registro.atorNome %></strong><br><span class="text-muted"><%= registro.atorPerfil %></span></td>
+                      <td><%= acoesAcompanhamento[registro.acao] %></td>
+                      <td>#<%= registro.entidadeId %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr><td colspan="4" style="text-align:center; padding:32px; color:#64748b;">Nenhum acompanhamento encontrado.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+          <% if (paginas > 1) { %>
+            <nav class="pagination-bar" aria-label="Paginação do acompanhamento">
+              <% if (pagina > 1) { %><a class="btn btn-secondary btn-sm" href="/auditoria?pagina=<%= pagina - 1 %>">‹ Anterior</a><% } %>
+              <span class="text-muted">Página <%= pagina %> de <%= paginas %></span>
+              <% if (pagina < paginas) { %><a class="btn btn-secondary btn-sm" href="/auditoria?pagina=<%= pagina + 1 %>">Próxima ›</a><% } %>
+            </nav>
+          <% } %>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

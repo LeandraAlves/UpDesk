@@ -6,6 +6,7 @@ const Comentario = require('./Comentario');
 const MensagemEquipe = require('./MensagemEquipe');
 const Etiqueta = require('./Etiqueta');
 const ChamadoEtiqueta = require('./ChamadoEtiqueta');
+const RegistroAuditoria = require('./RegistroAuditoria');
 
 Usuario.belongsTo(Departamento, { foreignKey: 'departamentoId', as: 'departamento' });
 Departamento.hasMany(Usuario, { foreignKey: 'departamentoId', as: 'usuarios' });
@@ -53,5 +54,6 @@ module.exports = {
   Comentario,
   MensagemEquipe,
   Etiqueta,
-  ChamadoEtiqueta
+  ChamadoEtiqueta,
+  RegistroAuditoria
 };

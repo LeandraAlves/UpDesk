@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const CategoriaChamado = require('../models/CategoriaChamado');
 const Departamento = require('../models/Departamento');
+const registrarAuditoria = require('../utils/registrarAuditoria');
 
 function validarId(id) {
   return /^[1-9]\d*$/.test(String(id));
@@ -56,7 +57,13 @@ exports.cadastrar = async (req, res) => {
     if (!await Departamento.findByPk(departamentoId)) {
       return res.status(400).send('O departamento selecionado não existe.');
     }
-    await CategoriaChamado.create({ nome, descricao: descricao || null, departamentoId });
+    const categoria = await CategoriaChamado.create({ nome, descricao: descricao || null, departamentoId });
+    await registrarAuditoria(req, {
+      acao: 'categoria_criada',
+      entidade: 'categoria',
+      entidadeId: categoria.id,
+      detalhes: { nome, descricao: descricao || null, departamentoId }
+    });
     return res.redirect('/categorias?sucesso=criado');
   } catch (erro) {
     console.error('Erro ao cadastrar categoria de chamado:', erro);
@@ -86,7 +93,21 @@ exports.editar = async (req, res) => {
     if (categoria.departamentoId !== departamento.id && await categoria.countChamados()) {
       return res.status(409).send('Não é possível trocar o departamento de uma categoria que já possui chamados.');
     }
+    const antes = {
+      nome: categoria.nome,
+      descricao: categoria.descricao,
+      departamentoId: categoria.departamentoId
+    };
     await categoria.update({ nome, descricao: descricao || null, departamentoId });
+    await registrarAuditoria(req, {
+      acao: 'categoria_editada',
+      entidade: 'categoria',
+      entidadeId: categoria.id,
+      detalhes: {
+        antes,
+        depois: { nome, descricao: descricao || null, departamentoId }
+      }
+    });
     return res.redirect('/categorias?sucesso=editado');
   } catch (erro) {
     console.error('Erro ao editar categoria de chamado:', erro);
@@ -104,7 +125,19 @@ exports.excluir = async (req, res) => {
     if (await categoria.countChamados()) {
       return res.status(409).send('Não é possível excluir uma categoria que possui chamados associados.');
     }
+    const dadosCategoria = {
+      id: categoria.id,
+      nome: categoria.nome,
+      descricao: categoria.descricao,
+      departamentoId: categoria.departamentoId
+    };
     await categoria.destroy();
+    await registrarAuditoria(req, {
+      acao: 'categoria_excluida',
+      entidade: 'categoria',
+      entidadeId: categoria.id,
+      detalhes: dadosCategoria
+    });
     return res.redirect('/categorias?sucesso=excluido');
   } catch (erro) {
     console.error('Erro ao excluir categoria de chamado:', erro);

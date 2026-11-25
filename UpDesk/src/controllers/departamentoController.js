@@ -2,6 +2,7 @@ const Departamento = require('../models/Departamento');
 const Chamado = require('../models/Chamado');
 const Usuario = require('../models/Usuario');
 const CategoriaChamado = require('../models/CategoriaChamado');
+const registrarAuditoria = require('../utils/registrarAuditoria');
 
 const TAMANHO_MAXIMO = 255;
 
@@ -69,9 +70,15 @@ exports.cadastrar = async (req, res) => {
       });
     }
 
-    await Departamento.create({
+    const departamento = await Departamento.create({
       nome: formulario.nome,
       descricao: formulario.descricao || null
+    });
+    await registrarAuditoria(req, {
+      acao: 'departamento_criado',
+      entidade: 'departamento',
+      entidadeId: departamento.id,
+      detalhes: { nome: departamento.nome, descricao: departamento.descricao }
     });
     return res.redirect('/departamentos?sucesso=criado');
   } catch (erro) {
@@ -140,9 +147,19 @@ exports.editar = async (req, res) => {
       });
     }
 
+    const antes = { nome: departamento.nome, descricao: departamento.descricao };
     await departamento.update({
       nome: formulario.nome,
       descricao: formulario.descricao || null
+    });
+    await registrarAuditoria(req, {
+      acao: 'departamento_editado',
+      entidade: 'departamento',
+      entidadeId: departamento.id,
+      detalhes: {
+        antes,
+        depois: { nome: departamento.nome, descricao: departamento.descricao }
+      }
     });
     return res.redirect('/departamentos?sucesso=editado');
   } catch (erro) {
@@ -203,7 +220,18 @@ exports.excluir = async (req, res) => {
         };
       }
 
+      const dadosDepartamento = {
+        id: departamento.id,
+        nome: departamento.nome,
+        descricao: departamento.descricao
+      };
       await departamento.destroy({ transaction });
+      await registrarAuditoria(req, {
+        acao: 'departamento_excluido',
+        entidade: 'departamento',
+        entidadeId: dadosDepartamento.id,
+        detalhes: dadosDepartamento
+      }, transaction);
       return { status: 200 };
     });
 

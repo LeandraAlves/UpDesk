@@ -1,5 +1,6 @@
 const Usuario = require('../models/Usuario');
 const bcrypt = require('bcryptjs');
+const registrarAuditoria = require('../utils/registrarAuditoria');
 
 module.exports = {
   renderizarLogin(req, res) {
@@ -40,7 +41,14 @@ module.exports = {
 
     try {
       const senha_hash = await bcrypt.hash(senha, 12);
-      await Usuario.create({ nome, email, senha_hash, perfil: 'cliente' });
+      const usuario = await Usuario.create({ nome, email, senha_hash, perfil: 'cliente' });
+      await registrarAuditoria(req, {
+        ator: { id: usuario.id, nome: usuario.nome, perfil: usuario.perfil },
+        acao: 'usuario_cadastrado',
+        entidade: 'usuario',
+        entidadeId: usuario.id,
+        detalhes: { nome, email, perfil: 'cliente' }
+      });
       return res.redirect('/autenticacao/login?cadastro=sucesso');
     } catch (erro) {
       if (erro.name === 'SequelizeUniqueConstraintError') {
