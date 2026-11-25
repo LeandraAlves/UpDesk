@@ -2,7 +2,6 @@ const { DataTypes, QueryTypes } = require('sequelize');
 const sequelize = require('./banco');
 const Chamado = require('../models/Chamado');
 const CategoriaChamado = require('../models/CategoriaChamado');
-const TipoUsuario = require('../models/TipoUsuario');
 
 module.exports = async function migrarCategoriasChamado() {
   const queryInterface = sequelize.getQueryInterface();
@@ -26,15 +25,21 @@ module.exports = async function migrarCategoriasChamado() {
   );
 
   for (const chamadoLegado of chamadosLegados) {
-    const tipoUsuario = await TipoUsuario.findByPk(chamadoLegado.categoriaId);
-    if (!tipoUsuario) continue;
+    const [categoriaLegada] = await sequelize.query(
+      'SELECT `nome`, `descricao` FROM `categorias` WHERE `id` = ? LIMIT 1',
+      {
+        replacements: [chamadoLegado.categoriaId],
+        type: QueryTypes.SELECT
+      }
+    );
+    if (!categoriaLegada) continue;
     const [categoria] = await CategoriaChamado.findOrCreate({
       where: {
-        nome: tipoUsuario.nome,
+        nome: categoriaLegada.nome,
         departamentoId: chamadoLegado.departamentoId
       },
       defaults: {
-        descricao: tipoUsuario.descricao
+        descricao: categoriaLegada.descricao
       }
     });
     await Chamado.update(

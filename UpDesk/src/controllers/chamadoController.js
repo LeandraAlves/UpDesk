@@ -293,17 +293,22 @@ exports.detalhes = async (req, res) => {
     const podeGerenciar = ehAdmin(req.session.usuario) ||
       (ehTecnico(req.session.usuario) && chamado.tecnicoId === req.session.usuario.id &&
         chamado.departamentoId === req.session.usuario.departamentoId);
-    const tecnicosTransferencia = podeGerenciar
-      ? await Usuario.findAll({
-        where: {
-          perfil: 'tecnico',
-          departamentoId: chamado.departamentoId,
-          id: { [Op.ne]: chamado.tecnicoId || 0 }
-        },
-        attributes: ['id', 'nome'],
-        order: [['nome', 'ASC']]
-      })
-      : [];
+    const [departamentosTransferencia, tecnicosTransferencia] = podeGerenciar
+      ? await Promise.all([
+        Departamento.findAll({
+          attributes: ['id', 'nome'],
+          order: [['nome', 'ASC']]
+        }),
+        Usuario.findAll({
+          where: {
+            perfil: 'tecnico',
+            id: { [Op.ne]: chamado.tecnicoId || 0 }
+          },
+          attributes: ['id', 'nome', 'departamentoId'],
+          order: [['nome', 'ASC']]
+        })
+      ])
+      : [[], []];
     return res.render('detalhesChamado', {
       usuario: req.session.usuario,
       chamado,
@@ -314,6 +319,7 @@ exports.detalhes = async (req, res) => {
         chamado.status === 'aberto' && chamado.tecnicoId === null,
       podeResolver: podeGerenciar && !['fechado', 'cancelado'].includes(chamado.status),
       podeReabrir: podeGerenciar && chamado.status === 'fechado',
+      departamentosTransferencia,
       tecnicosTransferencia,
       podeCancelar: chamado.usuarioId === req.session.usuario.id && chamado.status === 'aberto',
       erro: null
@@ -523,21 +529,32 @@ exports.transferir = async (req, res) => {
     if (['fechado', 'cancelado'].includes(chamado.status)) {
       return res.status(409).send('Não é possível transferir um chamado encerrado.');
     }
+    const departamentoId = Number(req.body.departamentoId);
     const tecnicoId = Number(req.body.tecnicoId);
-    if (!Number.isInteger(tecnicoId) || tecnicoId < 1) {
-      return res.status(400).send('Selecione um técnico válido.');
+    if (![departamentoId, tecnicoId].every(id => Number.isInteger(id) && id > 0)) {
+      return res.status(400).send('Selecione um departamento e um técnico válidos.');
     }
     const tecnico = await Usuario.findOne({
       where: {
         id: tecnicoId,
         perfil: 'tecnico',
-        departamentoId: chamado.departamentoId
+        departamentoId
       }
     });
     if (!tecnico) {
-      return res.status(400).send('O técnico selecionado deve pertencer ao mesmo departamento do chamado.');
+      return res.status(400).send('O técnico selecionado não pertence ao departamento informado.');
     }
-    await chamado.update({ tecnicoId: tecnico.id, status: 'em_andamento' });
+    if (tecnico.id === chamado.tecnicoId) {
+      return res.status(400).send('Selecione um técnico diferente do responsável atual.');
+    }
+    await chamado.update({
+      departamentoId,
+      categoriaChamadoId: departamentoId === Number(chamado.departamentoId)
+        ? chamado.categoriaChamadoId
+        : null,
+      tecnicoId: tecnico.id,
+      status: 'em_andamento'
+    });
     return res.redirect(`/chamados/${chamado.id}`);
   } catch (erro) {
     console.error('Erro ao transferir chamado:', erro);

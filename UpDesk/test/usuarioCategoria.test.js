@@ -1,23 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const usuarioDeveTerDepartamento = require('../src/utils/usuarioDeveTerDepartamento');
 const validarCamposCategoria = require('../src/utils/validarCamposCategoria');
-
-test('perfil cliente não recebe departamento associado', () => {
-  assert.equal(usuarioDeveTerDepartamento('cliente', 'Suporte'), false);
-});
-
-test('categoria Cliente não recebe departamento independentemente do perfil', () => {
-  assert.equal(usuarioDeveTerDepartamento('tecnico', ' Cliente '), false);
-});
-
-test('categoria Gerencia continua dispensando departamento', () => {
-  assert.equal(usuarioDeveTerDepartamento('admin', 'GERENCIA'), false);
-});
-
-test('outros perfis e categorias podem manter departamento', () => {
-  assert.equal(usuarioDeveTerDepartamento('tecnico', 'Suporte'), true);
-});
 
 test('exige o nome da categoria', () => {
   assert.equal(

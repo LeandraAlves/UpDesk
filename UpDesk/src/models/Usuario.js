@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/banco');
-const TipoUsuario = require('./TipoUsuario');
 const Departamento = require('./Departamento');
 
 const Usuario = sequelize.define('Usuario', {
@@ -14,15 +13,6 @@ const Usuario = sequelize.define('Usuario', {
     defaultValue: 'cliente',
     validate: {
       isIn: [['admin', 'tecnico', 'cliente']]
-    }
-  },
-  tipoUsuarioId: {
-    type: DataTypes.INTEGER, 
-    allowNull: true,
-    field: 'categoriaId',
-    references: {
-      model: TipoUsuario,
-      key: 'id'
     }
   },
   departamentoId: {

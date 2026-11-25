@@ -41,7 +41,6 @@
                     <th>Nome</th>
                     <th>E-mail</th>
                     <th>Perfil</th>
-                    <th>Tipo de usuário</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
@@ -63,7 +62,6 @@
                             <span class="badge badge-neutral"><%= u.perfil %></span>
                           <% } %>
                         </td>
-                        <td><%= u.tipoUsuario ? u.tipoUsuario.nome : 'Sem tipo definido' %></td>
                         <td>
                           <% if (u.id !== usuario.id) { %>
                             <form action="/usuarios/excluir/<%= u.id %>" method="POST" onsubmit="return confirm('Excluir este usuário?')">
@@ -75,7 +73,7 @@
                     <% }) %>
                   <% } else { %>
                     <tr>
-                      <td colspan="6" style="text-align:center; padding:32px; color:#64748b;">Nenhum usuário encontrado.</td>
+                      <td colspan="5" style="text-align:center; padding:32px; color:#64748b;">Nenhum usuário encontrado.</td>
                     </tr>
                   <% } %>
                 </tbody>
@@ -103,23 +101,11 @@
 
               <div class="form-group">
                 <label class="form-label">Perfil <span class="req">*</span></label>
-                <select name="perfil" id="perfilSelect" class="form-control" required onchange="verificarTipoUsuario()">
+                <select name="perfil" id="perfilSelect" class="form-control" required onchange="verificarPerfil()">
                   <option value="">Selecione o Perfil...</option>
                   <option value="tecnico">Técnico</option>
                   <option value="admin">Admin</option>
                   <option value="cliente">Cliente</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Tipo de usuário <span class="req">*</span></label>
-                <select name="tipoUsuarioId" id="tipoUsuarioSelect" class="form-control" required onchange="verificarTipoUsuario()">
-                  <option value="">Selecione o tipo de usuário...</option>
-                  <% if (typeof tiposUsuario !== 'undefined') { %>
-                    <% tiposUsuario.forEach(tipoUsuario => { %>
-                      <option value="<%= tipoUsuario.id %>" data-nome="<%= tipoUsuario.nome.trim().toLowerCase() %>"><%= tipoUsuario.nome %></option>
-                    <% }) %>
-                  <% } %>
                 </select>
               </div>
 
@@ -144,22 +130,20 @@
   </div>
 
   <script>
-    function verificarTipoUsuario() {
-      const tipoUsuarioSelect = document.getElementById('tipoUsuarioSelect');
-      const selectedOption = tipoUsuarioSelect.options[tipoUsuarioSelect.selectedIndex];
-      const nomeTipoUsuario = (selectedOption.getAttribute('data-nome') || '').trim().toLowerCase();
+    function verificarPerfil() {
       const perfil = document.getElementById('perfilSelect').value;
       const campoDep = document.getElementById('campoDepartamento');
       const departamentoSelect = document.getElementById('departamentoSelect');
-      const semDepartamento = perfil === 'cliente' ||
-        (perfil !== 'tecnico' && ['cliente', 'gerencia'].includes(nomeTipoUsuario));
+      const precisaDepartamento = perfil === 'tecnico';
 
-      campoDep.style.display = semDepartamento ? 'none' : 'block';
-      departamentoSelect.disabled = semDepartamento;
-      if (semDepartamento) {
+      campoDep.style.display = precisaDepartamento ? 'block' : 'none';
+      departamentoSelect.disabled = !precisaDepartamento;
+      if (!precisaDepartamento) {
         departamentoSelect.value = '';
       }
     }
+
+    verificarPerfil();
   </script>
 </body>
 </html>

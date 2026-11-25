@@ -110,17 +110,24 @@
                         <h2 id="transfer-modal-title" class="card-title">Transferir chamado</h2>
                         <button type="button" class="transfer-dialog-close" data-close-transfer aria-label="Fechar">×</button>
                       </div>
-                      <% if (tecnicosTransferencia.length) { %>
+                      <% if (departamentosTransferencia.length) { %>
                         <form action="/chamados/<%= chamado.id %>/transferir" method="POST">
-                          <label class="form-label" for="tecnicoDestino">Técnico do mesmo departamento</label>
-                          <select id="tecnicoDestino" name="tecnicoId" class="form-control" required>
-                            <option value="">Selecione um técnico</option>
-                            <% tecnicosTransferencia.forEach(tecnico => { %><option value="<%= tecnico.id %>"><%= tecnico.nome %></option><% }) %>
+                          <label class="form-label" for="departamentoDestino">Departamento de destino</label>
+                          <select id="departamentoDestino" name="departamentoId" class="form-control" required>
+                            <option value="">Selecione um departamento</option>
+                            <% departamentosTransferencia.forEach(departamento => { %><option value="<%= departamento.id %>"><%= departamento.nome %></option><% }) %>
                           </select>
+
+                          <label class="form-label" for="tecnicoDestino" style="margin-top:12px;">Técnico de destino</label>
+                          <select id="tecnicoDestino" name="tecnicoId" class="form-control" required disabled>
+                            <option value="">Selecione primeiro um departamento</option>
+                            <% tecnicosTransferencia.forEach(tecnico => { %><option value="<%= tecnico.id %>" data-departamento-id="<%= tecnico.departamentoId %>"><%= tecnico.nome %></option><% }) %>
+                          </select>
+                          <p id="avisoTecnicosDestino" class="text-muted" role="status" hidden>Não há técnicos disponíveis neste departamento.</p>
                           <button type="submit" class="btn btn-primary" style="margin-top:12px;">Confirmar transferência</button>
                         </form>
                       <% } else { %>
-                        <p class="text-muted" role="status">Não há outros técnicos neste departamento para transferir o chamado.</p>
+                        <p class="text-muted" role="status">Não há departamentos disponíveis para transferir este chamado.</p>
                       <% } %>
                     </div>
                   </dialog>
@@ -155,6 +162,33 @@
       const dialogoTransferencia = document.getElementById('transfer-modal');
       const abrirTransferencia = document.querySelector('[data-open-transfer]');
       if (!dialogoTransferencia || !abrirTransferencia) return;
+
+      const departamentoDestino = dialogoTransferencia.querySelector('#departamentoDestino');
+      const tecnicoDestino = dialogoTransferencia.querySelector('#tecnicoDestino');
+      const avisoTecnicosDestino = dialogoTransferencia.querySelector('#avisoTecnicosDestino');
+
+      if (departamentoDestino) {
+        function filtrarOpcoes(select, departamentoId) {
+          let totalOpcoes = 0;
+          Array.from(select.options).forEach(function (option) {
+            if (!option.value) return;
+            const corresponde = option.dataset.departamentoId === departamentoId;
+            option.hidden = !corresponde;
+            option.disabled = !corresponde;
+            if (corresponde) totalOpcoes += 1;
+          });
+          select.value = '';
+          select.disabled = !departamentoId || totalOpcoes === 0;
+          return totalOpcoes;
+        }
+
+        departamentoDestino.addEventListener('change', function () {
+          const departamentoId = departamentoDestino.value;
+          const totalTecnicos = filtrarOpcoes(tecnicoDestino, departamentoId);
+          avisoTecnicosDestino.hidden = !departamentoId || totalTecnicos > 0;
+        });
+      }
+
       abrirTransferencia.addEventListener('click', function () {
         dialogoTransferencia.showModal();
       });

@@ -1,5 +1,4 @@
 const Usuario = require('./Usuario');
-const TipoUsuario = require('./TipoUsuario');
 const CategoriaChamado = require('./CategoriaChamado');
 const Departamento = require('./Departamento');
 const Chamado = require('./Chamado');
@@ -8,8 +7,6 @@ const MensagemEquipe = require('./MensagemEquipe');
 const Etiqueta = require('./Etiqueta');
 const ChamadoEtiqueta = require('./ChamadoEtiqueta');
 
-Usuario.belongsTo(TipoUsuario, { foreignKey: 'tipoUsuarioId', as: 'tipoUsuario' });
-TipoUsuario.hasMany(Usuario, { foreignKey: 'tipoUsuarioId', as: 'usuarios' });
 Usuario.belongsTo(Departamento, { foreignKey: 'departamentoId', as: 'departamento' });
 Departamento.hasMany(Usuario, { foreignKey: 'departamentoId', as: 'usuarios' });
 
@@ -50,7 +47,6 @@ Etiqueta.belongsToMany(Chamado, {
 
 module.exports = {
   Usuario,
-  TipoUsuario,
   CategoriaChamado,
   Departamento,
   Chamado,

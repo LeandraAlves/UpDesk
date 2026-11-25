@@ -1,11 +1,9 @@
 const { Op } = require('sequelize');
 const Usuario = require('../models/Usuario');
-const TipoUsuario = require('../models/TipoUsuario');
 const Departamento = require('../models/Departamento');
 const Chamado = require('../models/Chamado');
 const Comentario = require('../models/Comentario');
-const bcrypt = require('bcrypt');
-const usuarioDeveTerDepartamento = require('../utils/usuarioDeveTerDepartamento');
+const bcrypt = require('bcryptjs');
 
 exports.listar = async (req, res) => {
   try {
@@ -19,16 +17,13 @@ exports.listar = async (req, res) => {
           { nome: { [Op.like]: `%${busca}%` } },
           { email: { [Op.like]: `%${busca}%` } }
         ]
-      } : {},
-      include: [{ model: TipoUsuario, as: 'tipoUsuario' }]
+      } : {}
     });
-    const tiposUsuario = await TipoUsuario.findAll();
     const departamentos = await Departamento.findAll();
 
     res.render('usuarios', {
       usuario: req.session.usuario || { nome: 'Gerencia', perfil: 'admin' },
       usuarios,
-      tiposUsuario,
       departamentos,
       busca,
       sucesso: typeof req.query.sucesso === 'string' ? req.query.sucesso : ''
@@ -76,7 +71,6 @@ exports.cadastrar = async (req, res) => {
   const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
   const senha = typeof req.body.senha === 'string' ? req.body.senha : '';
   const { perfil } = req.body;
-  const tipoUsuarioId = req.body.tipoUsuarioId ? Number(req.body.tipoUsuarioId) : null;
   const departamentoInformado = req.body.departamentoId;
 
   if (!['admin', 'tecnico', 'cliente'].includes(perfil)) {
@@ -94,18 +88,9 @@ exports.cadastrar = async (req, res) => {
   if (Buffer.byteLength(senha, 'utf8') > 72) {
     return res.status(400).send('A senha deve ter no máximo 72 bytes.');
   }
-  if (!Number.isInteger(tipoUsuarioId) || tipoUsuarioId < 1) {
-    return res.status(400).send('Selecione um tipo de usuário válido.');
-  }
-
   try {
-    const tipoUsuario = await TipoUsuario.findByPk(tipoUsuarioId);
-    if (!tipoUsuario) {
-      return res.status(400).send('O tipo de usuário selecionado não existe.');
-    }
-
     let departamentoId = null;
-    if (perfil === 'tecnico' || usuarioDeveTerDepartamento(perfil, tipoUsuario.nome)) {
+    if (perfil === 'tecnico') {
       if (
         typeof departamentoInformado !== 'string' ||
         !/^[1-9]\d*$/.test(departamentoInformado)
@@ -126,7 +111,6 @@ exports.cadastrar = async (req, res) => {
       email,
       senha_hash,
       perfil,
-      tipoUsuarioId,
       departamentoId
     });
 

@@ -44,7 +44,6 @@ app.use(session({
 // --- IMPORTAÇÃO DE ROTAS ---
 const autenticacaoRotas = require('./src/routes/autenticacaoRotas');
 const categoriaChamadoRotas = require('./src/routes/categoriaChamadoRotas');
-const tipoUsuarioRotas = require('./src/routes/tipoUsuarioRotas');
 const departamentoRotas = require('./src/routes/departamentoRotas');
 const usuarioRotas = require('./src/routes/usuarioRotas');
 const chamadoRotas = require('./src/routes/chamadoRotas');
@@ -71,7 +70,6 @@ app.get('/inicio', autenticado, (req, res, next) => {
 // Módulos do sistema
 app.use('/autenticacao', autenticacaoRotas);
 app.use('/categorias', autenticado, categoriaChamadoRotas);
-app.use('/tipos-usuario', autenticado, tipoUsuarioRotas);
 app.use('/departamentos', autenticado, departamentoRotas);
 app.use('/usuarios', autenticado, usuarioRotas);
 app.use('/chamados', autenticado, chamadoRotas);

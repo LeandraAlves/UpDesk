@@ -120,16 +120,15 @@ Os modelos e associações ficam em `src/models`; tabelas e chaves são sincroni
 
 | Entidade | Campos principais |
 |---|---|
-| Usuario | id, nome, email, senha_hash, perfil, tipo_usuario_id, departamento_id |
+| Usuario | id, nome, email, senha_hash, perfil, departamento_id |
 | Departamento | id, nome, descricao |
-| TipoUsuario | id, nome, descricao |
 | CategoriaChamado | id, nome, descricao, departamento_id |
 | Chamado | id, titulo, descricao, status, prioridade, prazo, usuario_id, departamento_id, categoria_chamado_id, tecnico_id |
 | Comentario | id, texto, chamado_id, usuario_id, data_criacao |
 | Etiqueta | id, nome |
 | Chamado_Etiqueta | chamado_id, etiqueta_id (associação N:N) |
 
-**Relacionamentos previstos:** Departamento 1:N Chamado e CategoriaChamado; CategoriaChamado 1:N Chamado; TipoUsuario 1:N Usuario; Usuário 1:N Chamado; Chamado 1:N Comentário; Chamado N:N Etiqueta via Chamado_Etiqueta.
+**Relacionamentos previstos:** Departamento 1:N Chamado e CategoriaChamado; CategoriaChamado 1:N Chamado; Usuário 1:N Chamado; Chamado 1:N Comentário; Chamado N:N Etiqueta via Chamado_Etiqueta.
 
 ### Diagrama conceitual preliminar
 
@@ -154,7 +153,7 @@ erDiagram
 - Técnicos veem na fila somente chamados não atribuídos do próprio departamento, podem transferir chamados atribuídos a outros técnicos do mesmo departamento e marcar chamados como resolvidos.
 - O painel inicial da administração é identificado como “Início”; o painel de desempenho da equipe fica restrito ao administrador.
 - O detalhe do chamado mantém o histórico de mensagens entre solicitante e técnico. O cliente vê a própria lista sem filtros.
-- Cadastros, alterações e mensagens refletem na tela sem recarregar a página inteira; tipos de usuário e categorias de chamados têm gerenciamento exclusivo do administrador.
+- Cadastros, alterações e mensagens refletem na tela sem recarregar a página inteira; categorias de chamados têm gerenciamento exclusivo do administrador.
 
 ## 9. Repositório e quadro de tarefas
 

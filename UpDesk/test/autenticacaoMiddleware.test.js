@@ -72,7 +72,7 @@ test('permite acesso administrativo aos perfis autorizados', () => {
   }
 });
 
-test('somente o perfil admin pode gerenciar tipos e categorias', () => {
+test('somente o perfil admin pode gerenciar categorias', () => {
   const resposta = criarResposta();
   let continuou = false;
 
